@@ -26,14 +26,14 @@
 
     <div id="toast-container"></div>
 
-    <!-- Đăng nhập -->
+    <!-- Login -->
     <div id="login-sec" class="flex flex-col items-center justify-center h-screen p-4">
         <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-slate-700 w-full max-w-sm">
             <h1 class="text-2xl font-bold mb-2 text-center text-white">ZiroGame Admin</h1>
-            <p class="text-slate-400 text-center text-xs mb-6">Truy cập hệ thống quản trị</p>
+            <p class="text-slate-400 text-center text-xs mb-6">Đăng nhập hệ thống</p>
             <form onsubmit="handleLogin(event)" class="space-y-4">
-                <input type="email" id="adm-email" class="w-full bg-slate-900 p-3 rounded-lg border border-slate-600 outline-none text-white" placeholder="Email quản trị" required>
-                <input type="password" id="adm-pass" class="w-full bg-slate-900 p-3 rounded-lg border border-slate-600 outline-none text-white" placeholder="Mật khẩu" required>
+                <input type="email" id="adm-email" class="w-full bg-slate-900 p-3 rounded-lg border border-slate-600 outline-none text-white" placeholder="admin@gmail.com" required>
+                <input type="password" id="adm-pass" class="w-full bg-slate-900 p-3 rounded-lg border border-slate-600 outline-none text-white" placeholder="••••••••" required>
                 <button type="submit" id="login-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-lg font-bold mt-2">Đăng nhập</button>
             </form>
         </div>
@@ -43,7 +43,9 @@
     <div id="dash-sec" class="hidden min-h-screen flex flex-col">
         <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-20 shadow-lg">
             <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
-                <div class="font-bold text-lg">ZiroGame Admin</div>
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-lg">ZiroGame Admin</span>
+                </div>
                 <div class="flex bg-slate-900 rounded-lg p-1 gap-1 overflow-x-auto">
                     <button onclick="showTab('games')" id="btn-games" class="tab-btn active px-4 py-1.5 rounded-md text-sm text-slate-400">Trò chơi</button>
                     <button onclick="showTab('settings')" id="btn-settings" class="tab-btn px-4 py-1.5 rounded-md text-sm text-slate-400">Cài đặt</button>
@@ -55,7 +57,7 @@
 
         <main class="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">
             
-            <!-- TAB TRÒ CHƠI -->
+            <!-- GAMES TAB -->
             <div id="tab-games" class="tab-content">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 h-fit">
@@ -68,46 +70,66 @@
                         </div>
                     </div>
                     <div class="lg:col-span-2 bg-slate-800 p-5 rounded-xl border border-slate-700 h-[70vh] flex flex-col">
-                        <h2 class="font-bold mb-4 text-slate-300">Trò chơi hiện tại</h2>
+                        <h2 class="font-bold mb-4 text-slate-300">Trò chơi đang chạy</h2>
                         <div id="games-list" class="flex-1 overflow-y-auto space-y-2 pr-2">Đang tải...</div>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB CÀI ĐẶT -->
+            <!-- SETTINGS TAB -->
             <div id="tab-settings" class="tab-content hidden">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Game & Coin Config -->
                     <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-                        <h2 class="font-bold mb-5 text-yellow-400 border-b border-slate-700 pb-2">Cấu hình xu</h2>
+                        <h2 class="font-bold mb-5 text-yellow-400 border-b border-slate-700 pb-2">Cấu hình Game & Xu</h2>
                         <div class="space-y-4">
-                            <label class="block text-[10px] uppercase text-slate-400 font-bold">Thời lượng ván (giây)</label>
-                            <input id="set-duration" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
-                            <label class="block text-[10px] uppercase text-slate-400 font-bold">Thưởng mỗi ván (xu)</label>
-                            <input id="set-reward" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
-                            <label class="block text-[10px] uppercase text-slate-400 font-bold">Thưởng giới thiệu (xu)</label>
-                            <input id="set-refer" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
-                            <label class="block text-[10px] uppercase text-slate-400 font-bold">Giá trị 100 xu (VD: 10.000đ)</label>
-                            <input id="set-val" type="text" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
+                            <div>
+                                <label class="text-[10px] uppercase text-slate-400 font-bold">Thời lượng (giây)</label>
+                                <input id="set-duration" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
+                            </div>
+                            <div>
+                                <label class="text-[10px] uppercase text-slate-400 font-bold">Thưởng mỗi ván (xu)</label>
+                                <input id="set-reward" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
+                            </div>
+                            <div>
+                                <label class="text-[10px] uppercase text-slate-400 font-bold">Thưởng giới thiệu (xu)</label>
+                                <input id="set-refer" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
+                            </div>
+                            <div>
+                                <label class="text-[10px] uppercase text-slate-400 font-bold">Giá trị 100 xu</label>
+                                <input id="set-val" type="text" placeholder="10.000 VNĐ" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
+                            </div>
                         </div>
                     </div>
 
+                    <!-- Watch & Earn Config -->
                     <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-                        <h2 class="font-bold mb-5 text-purple-400 border-b border-slate-700 pb-2">Quảng cáo & Thanh toán</h2>
+                        <h2 class="font-bold mb-5 text-purple-400 border-b border-slate-700 pb-2">Cài đặt quảng cáo</h2>
                         <div class="space-y-4">
-                            <label class="block text-[10px] uppercase text-slate-400 font-bold">Xu khi xem quảng cáo</label>
-                            <input id="set-ad-reward" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
-                            <label class="block text-[10px] uppercase text-slate-400 font-bold">Thời gian chờ quảng cáo (giây)</label>
-                            <input id="set-ad-delay" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
-                            <input id="set-methods" placeholder="Phương thức thanh toán (VD: Momo, ATM)" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
+                            <div>
+                                <label class="text-[10px] uppercase text-slate-400 font-bold">Thưởng xem quảng cáo</label>
+                                <input id="set-ad-reward" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
+                            </div>
+                            <div>
+                                <label class="text-[10px] uppercase text-slate-400 font-bold">Thời gian chờ (giây)</label>
+                                <input id="set-ad-delay" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
+                            </div>
+                        </div>
+                        
+                        <h2 class="font-bold mb-3 mt-6 text-blue-400 border-b border-slate-700 pb-2">Liên kết & Thanh toán</h2>
+                        <div class="space-y-3">
+                            <input id="set-methods" placeholder="Phương thức (Momo, Bank...)" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
                             <input id="link-tg" placeholder="Link Telegram" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
                             <input id="link-yt" placeholder="Link YouTube" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
+                            <input id="link-ig" placeholder="Link Instagram" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
                         </div>
-                        <button onclick="saveSettings()" class="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded font-bold mt-6">Lưu cài đặt</button>
+
+                        <button onclick="saveSettings()" class="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded font-bold mt-6">Lưu cấu hình</button>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB RÚT TIỀN -->
+            <!-- WITHDRAWALS TAB -->
             <div id="tab-withdrawals" class="tab-content hidden">
                 <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 h-[80vh] flex flex-col">
                     <div class="flex justify-between items-center mb-4">
@@ -121,7 +143,7 @@
     </div>
 
     <script>
-        <script>
+        // DÁN ĐOẠN CẤU HÌNH CỦA BẠN VÀO ĐÂY:
         const firebaseConfig = { apiKey: "AIzaSyA2CtHpu_lm_tgrRshFzq-jD-PNrXzUrhM", authDomain: "zirogame-e078c.firebaseapp.com", databaseURL: "https://zirogame-e078c-default-rtdb.firebaseio.com", projectId: "zirogame-e078c", storageBucket: "zirogame-e078c.firebasestorage.app", messagingSenderId: "932469574208", appId: "1:932469574208:web:4ddf6635c3795f424dada5" };
         const appId = "1:932469574208:web:4ddf6635c3795f424dada5";
         
@@ -135,15 +157,15 @@
             e.preventDefault();
             document.getElementById('login-btn').innerText = 'Đang xác thực...';
             try { await auth.signInWithEmailAndPassword(document.getElementById('adm-email').value, document.getElementById('adm-pass').value); }
-            catch(e) { showToast("Sai tài khoản hoặc mật khẩu!", 'error'); document.getElementById('login-btn').innerText='Đăng nhập'; }
+            catch(e) { showToast(e.message, 'error'); document.getElementById('login-btn').innerText='Đăng nhập'; }
         }
 
         async function verifyAdmin(user) {
             try {
                 const doc = await db.collection(`artifacts/${appId}/admins`).doc(user.uid).get();
-                if(doc.exists && doc.data().role === 'admins') { showDashboard(); initData(); showToast("Chào mừng quản trị viên!", "success"); }
-                else throw new Error("Không phải Admin");
-            } catch(e) { auth.signOut(); showToast("Truy cập bị từ chối", "error"); }
+                if(doc.exists && doc.data().role === 'admins') { showDashboard(); initData(); showToast("Đăng nhập thành công!", "success"); }
+                else throw new Error("Truy cập bị từ chối");
+            } catch(e) { auth.signOut(); showToast(e.message, "error"); }
         }
 
         function showLogin() { document.getElementById('login-sec').classList.remove('hidden'); document.getElementById('dash-sec').classList.add('hidden'); }
@@ -161,32 +183,38 @@
 
         function addGame() {
             const t=document.getElementById('g-title').value, i=document.getElementById('g-img').value, u=document.getElementById('g-url').value;
-            if(!t||!u) return showToast("Vui lòng điền đủ tên và URL", "error");
+            if(!t||!u) return showToast("Thiếu tiêu đề hoặc URL", "error");
             db.collection(`artifacts/${appId}/public/data/games`).add({title:t, image:i, url:u, createdAt: firebase.firestore.FieldValue.serverTimestamp()})
-            .then(()=>{showToast("Đã thêm trò chơi!","success"); document.getElementById('g-title').value='';});
+            .then(()=>{showToast("Đã thêm thành công","success"); document.getElementById('g-title').value='';});
         }
 
         function loadGames() {
             db.collection(`artifacts/${appId}/public/data/games`).onSnapshot(s => {
                 const l = document.getElementById('games-list'); l.innerHTML = '';
-                s.forEach(d => {
-                    const gm = d.data();
-                    l.innerHTML += `<div class="flex items-center gap-3 bg-slate-900 p-3 rounded border border-slate-700"><img src="${gm.image}" class="w-10 h-10 rounded"><div class="flex-1"><p class="text-sm font-bold">${gm.title}</p></div><button onclick="delGame('${d.id}')" class="text-red-400"><i class="fas fa-trash"></i></button></div>`;
+                let g = []; s.forEach(d=>g.push({id:d.id, ...d.data()}));
+                g.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+                g.forEach(gm => {
+                    l.innerHTML += `<div class="flex items-center gap-3 bg-slate-900 p-3 rounded border border-slate-700"><img src="${gm.image}" class="w-10 h-10 rounded"><div class="flex-1"><p class="text-sm font-bold">${gm.title}</p></div><button onclick="delGame('${gm.id}')" class="text-red-400"><i class="fas fa-trash"></i></button></div>`;
                 });
             });
         }
-        function delGame(id) { if(confirm("Bạn có chắc chắn muốn xóa?")) db.collection(`artifacts/${appId}/public/data/games`).doc(id).delete(); }
+        function delGame(id) { if(confirm("Xóa trò chơi này?")) db.collection(`artifacts/${appId}/public/data/games`).doc(id).delete(); }
 
         function saveSettings() {
+            const methods = document.getElementById('set-methods').value.split(',').map(s=>s.trim()).filter(s=>s);
             const data = {
                 gameDuration: parseInt(document.getElementById('set-duration').value)||60,
                 gameReward: parseInt(document.getElementById('set-reward').value)||50,
                 referralBonus: parseInt(document.getElementById('set-refer').value)||500,
                 watchAdReward: parseInt(document.getElementById('set-ad-reward').value)||50,
                 watchAdDelay: parseInt(document.getElementById('set-ad-delay').value)||15,
-                coinValue: document.getElementById('set-val').value || "10.000đ",
-                paymentMethods: document.getElementById('set-methods').value.split(',').map(s=>s.trim()),
-                socials: { telegram: document.getElementById('link-tg').value, youtube: document.getElementById('link-yt').value }
+                coinValue: document.getElementById('set-val').value || "10.000 VNĐ",
+                paymentMethods: methods,
+                socials: {
+                    telegram: document.getElementById('link-tg').value,
+                    youtube: document.getElementById('link-yt').value,
+                    instagram: document.getElementById('link-ig').value
+                }
             };
             db.collection(`artifacts/${appId}/public/data/settings`).doc('global').set(data, {merge:true})
             .then(()=>showToast("Đã lưu cài đặt!","success"));
@@ -196,16 +224,17 @@
             db.collection(`artifacts/${appId}/public/data/settings`).doc('global').get().then(d => {
                 if(d.exists) {
                     const data = d.data();
-                    document.getElementById('set-duration').value = data.gameDuration || 60;
-                    document.getElementById('set-reward').value = data.gameReward || 50;
-                    document.getElementById('set-refer').value = data.referralBonus || 500;
-                    document.getElementById('set-ad-reward').value = data.watchAdReward || 50;
-                    document.getElementById('set-ad-delay').value = data.watchAdDelay || 15;
-                    document.getElementById('set-val').value = data.coinValue || "10.000đ";
+                    document.getElementById('set-duration').value = data.gameDuration||60;
+                    document.getElementById('set-reward').value = data.gameReward||50;
+                    document.getElementById('set-refer').value = data.referralBonus||500;
+                    document.getElementById('set-ad-reward').value = data.watchAdReward||50;
+                    document.getElementById('set-ad-delay').value = data.watchAdDelay||15;
+                    document.getElementById('set-val').value = data.coinValue||"10.000 VNĐ";
                     document.getElementById('set-methods').value = (data.paymentMethods||[]).join(', ');
                     if(data.socials) {
-                        document.getElementById('link-tg').value = data.socials.telegram || '';
-                        document.getElementById('link-yt').value = data.socials.youtube || '';
+                        document.getElementById('link-tg').value = data.socials.telegram||'';
+                        document.getElementById('link-yt').value = data.socials.youtube||'';
+                        document.getElementById('link-ig').value = data.socials.instagram||'';
                     }
                 }
             });
@@ -214,15 +243,15 @@
         function loadWithdrawals() {
             db.collection(`artifacts/${appId}/public/data/withdrawals`).onSnapshot(s => {
                 const l = document.getElementById('wd-list'); l.innerHTML = '';
-                s.forEach(d=>{ 
-                    const req = d.data();
-                    if(req.status==='pending') {
-                        l.innerHTML += `<div class="bg-slate-700/40 p-4 rounded border border-slate-600"><div class="flex justify-between"><b>${req.amount} xu</b> <span class="bg-slate-600 px-2 py-1 rounded text-xs">${req.method}</span></div><div class="text-sm text-green-400 mt-1">${req.details}</div><div class="flex gap-2 mt-2"><button onclick="upd('${d.id}','paid')" class="flex-1 bg-green-600 py-1 rounded text-sm">Đã trả</button><button onclick="upd('${d.id}','rejected')" class="flex-1 bg-red-600 py-1 rounded text-sm">Từ chối</button></div></div>`;
-                    }
+                let r = []; s.forEach(d=>{ if(d.data().status==='pending') r.push({id:d.id, ...d.data()}) });
+                if(r.length===0) return l.innerHTML='<p class="text-center text-slate-500 mt-10">Không có yêu cầu nào</p>';
+                r.sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
+                r.forEach(req => {
+                    l.innerHTML += `<div class="bg-slate-700/40 p-4 rounded border border-slate-600"><div class="flex justify-between"><b>${req.amount} xu</b> <span class="uppercase text-xs bg-slate-600 px-2 py-1 rounded">${req.method}</span></div><div class="text-sm text-green-400 mt-1 font-mono">${req.details}</div><div class="flex gap-2 mt-2"><button onclick="upd('${req.id}','paid')" class="flex-1 bg-green-600 py-1 rounded text-sm">Thanh toán</button><button onclick="upd('${req.id}','rejected')" class="flex-1 bg-red-600 py-1 rounded text-sm">Từ chối</button></div></div>`;
                 });
             });
         }
-        function upd(id, st) { db.collection(`artifacts/${appId}/public/data/withdrawals`).doc(id).update({status:st}).then(()=>showToast("Đã cập nhật trạng thái", "success")); }
+        function upd(id, st) { db.collection(`artifacts/${appId}/public/data/withdrawals`).doc(id).update({status:st}).then(()=>showToast("Đã xử lý thành công", "success")); }
 
         function showToast(m,t='info') {
             const d=document.createElement('div'); d.className='toast'; 
