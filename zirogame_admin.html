@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZiroGame AdminPanel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        body { font-family: sans-serif; background-color: #0f172a; color: white; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 4px; }
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 3000; }
+        .toast { background: #1e293b; border-left: 4px solid #6366f1; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s; display: flex; align-items: center; min-width: 250px; }
+        .toast.show { opacity: 1; }
+        .tab-btn.active { background-color: #4f46e5; color: white; border-color: #4f46e5; }
+    </style>
+</head>
+<body class="min-h-screen font-sans">
+
+    <div id="toast-container"></div>
+
+    <!-- Login -->
+    <div id="login-sec" class="flex flex-col items-center justify-center h-screen p-4">
+        <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-slate-700 w-full max-w-sm">
+            <h1 class="text-2xl font-bold mb-2 text-center text-white">GameToZone Admin</h1>
+            <p class="text-slate-400 text-center text-xs mb-6">Secure Access Only</p>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <input type="email" id="adm-email" class="w-full bg-slate-900 p-3 rounded-lg border border-slate-600 outline-none text-white" placeholder="admin@gmail.com" required>
+                <input type="password" id="adm-pass" class="w-full bg-slate-900 p-3 rounded-lg border border-slate-600 outline-none text-white" placeholder="••••••••" required>
+                <button type="submit" id="login-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-lg font-bold mt-2">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dash-sec" class="hidden min-h-screen flex flex-col">
+        <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-20 shadow-lg">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-lg">GameToZone Admin</span>
+                </div>
+                <div class="flex bg-slate-900 rounded-lg p-1 gap-1 overflow-x-auto">
+                    <button onclick="showTab('games')" id="btn-games" class="tab-btn active px-4 py-1.5 rounded-md text-sm text-slate-400">Games</button>
+                    <button onclick="showTab('settings')" id="btn-settings" class="tab-btn px-4 py-1.5 rounded-md text-sm text-slate-400">Settings</button>
+                    <button onclick="showTab('withdrawals')" id="btn-withdrawals" class="tab-btn px-4 py-1.5 rounded-md text-sm text-slate-400">Payouts</button>
+                </div>
+                <button onclick="logout()" class="bg-red-500/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-bold">Logout</button>
+            </div>
+        </header>
+
+        <main class="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">
+            
+            <!-- GAMES TAB -->
+            <div id="tab-games" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 h-fit">
+                        <h2 class="font-bold mb-4 text-green-400">Add Game</h2>
+                        <div class="space-y-3">
+                            <input id="g-title" placeholder="Game Title" class="w-full bg-slate-900 p-3 rounded border border-slate-600 text-sm outline-none">
+                            <input id="g-img" placeholder="Image URL" class="w-full bg-slate-900 p-3 rounded border border-slate-600 text-sm outline-none">
+                            <input id="g-url" placeholder="Game URL" class="w-full bg-slate-900 p-3 rounded border border-slate-600 text-sm outline-none">
+                            <button onclick="addGame()" class="w-full bg-green-600 hover:bg-green-700 py-2.5 rounded font-bold text-sm">Publish</button>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 bg-slate-800 p-5 rounded-xl border border-slate-700 h-[70vh] flex flex-col">
+                        <h2 class="font-bold mb-4 text-slate-300">Live Games</h2>
+                        <div id="games-list" class="flex-1 overflow-y-auto space-y-2 pr-2">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SETTINGS TAB -->
+            <div id="tab-settings" class="tab-content hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- Game & Coin Config -->
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                        <h2 class="font-bold mb-5 text-yellow-400 border-b border-slate-700 pb-2">Game & Coins</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-[10px] uppercase text-slate-400 font-bold">Game Duration (Seconds)</label>
+                                <input id="set-duration" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
+                            </div>
+                            <div>
+                                <label class="text-[10px] uppercase text-slate-400 font-bold">Reward Per Game (Coins)</label>
+                                <input id="set-reward" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
+                            </div>
+                            <div>
+                                <label class="text-[10px] uppercase text-slate-400 font-bold">Referral Bonus (Coins)</label>
+                                <input id="set-refer" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
+                            </div>
+                            <div>
+                                <label class="text-[10px] uppercase text-slate-400 font-bold">Coin Value (e.g. ₹1)</label>
+                                <input id="set-val" type="text" placeholder="₹1" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
+                                <p class="text-[10px] text-slate-500">Value of 100 Coins (Display only)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Watch & Earn Config -->
+                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                        <h2 class="font-bold mb-5 text-purple-400 border-b border-slate-700 pb-2">Watch & Earn Settings</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-[10px] uppercase text-slate-400 font-bold">Ad Reward (Coins)</label>
+                                <input id="set-ad-reward" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
+                            </div>
+                            <div>
+                                <label class="text-[10px] uppercase text-slate-400 font-bold">Ad Interval/Cooldown (Seconds)</label>
+                                <input id="set-ad-delay" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
+                                <p class="text-[10px] text-slate-500">Wait time between ads</p>
+                            </div>
+                        </div>
+                        
+                        <h2 class="font-bold mb-3 mt-6 text-blue-400 border-b border-slate-700 pb-2">Social & Payments</h2>
+                        <div class="space-y-3">
+                            <input id="set-methods" placeholder="Payment Methods (UPI, Paytm)" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
+                            <input id="link-tg" placeholder="Telegram Link" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
+                            <input id="link-yt" placeholder="YouTube Link" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
+                            <input id="link-ig" placeholder="Instagram Link" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
+                        </div>
+
+                        <button onclick="saveSettings()" class="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded font-bold mt-6">Save All Settings</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WITHDRAWALS TAB -->
+            <div id="tab-withdrawals" class="tab-content hidden">
+                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 h-[80vh] flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="font-bold text-red-400">Pending Requests</h2>
+                        <button onclick="loadWithdrawals()" class="text-xs bg-slate-700 px-3 py-1 rounded">Refresh</button>
+                    </div>
+                    <div id="wd-list" class="flex-1 overflow-y-auto space-y-3 pr-2"></div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "Your Id Enter",
+            authDomain: "Your Id Enter",
+            databaseURL: "Your Id Enter",
+            projectId: "Your Id Enter",
+            storageBucket: "Your Id Enter",
+            messagingSenderId: "Your Id Enter",
+            appId: "Your Id Enter"
+        };
+        const appId = "Your Id Enter";
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        auth.onAuthStateChanged(user => { if(user) verifyAdmin(user); else showLogin(); });
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            document.getElementById('login-btn').innerText = 'Verifying...';
+            try { await auth.signInWithEmailAndPassword(document.getElementById('adm-email').value, document.getElementById('adm-pass').value); }
+            catch(e) { showToast(e.message, 'error'); document.getElementById('login-btn').innerText='Login'; }
+        }
+
+        async function verifyAdmin(user) {
+            try {
+                const doc = await db.collection(`artifacts/${appId}/admins`).doc(user.uid).get();
+                if(doc.exists && doc.data().role === 'admin') { showDashboard(); initData(); showToast("Welcome Admin", "success"); }
+                else throw new Error("Not Admin");
+            } catch(e) { auth.signOut(); showToast("Access Denied", "error"); }
+        }
+
+        function showLogin() { document.getElementById('login-sec').classList.remove('hidden'); document.getElementById('dash-sec').classList.add('hidden'); }
+        function showDashboard() { document.getElementById('login-sec').classList.add('hidden'); document.getElementById('dash-sec').classList.remove('hidden'); }
+        function logout() { auth.signOut(); location.reload(); }
+        
+        function showTab(t) { 
+            document.querySelectorAll('.tab-content').forEach(e=>e.classList.add('hidden')); 
+            document.getElementById('tab-'+t).classList.remove('hidden');
+            document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active','text-white'));
+            document.getElementById('btn-'+t).classList.add('active','text-white');
+        }
+
+        function initData() { loadGames(); loadSettings(); loadWithdrawals(); }
+
+        // Logic
+        function addGame() {
+            const t=document.getElementById('g-title').value, i=document.getElementById('g-img').value, u=document.getElementById('g-url').value;
+            if(!t||!u) return showToast("Title/URL missing", "error");
+            db.collection(`artifacts/${appId}/public/data/games`).add({title:t, image:i, url:u, createdAt: firebase.firestore.FieldValue.serverTimestamp()})
+            .then(()=>{showToast("Game Added","success"); document.getElementById('g-title').value='';});
+        }
+
+        function loadGames() {
+            db.collection(`artifacts/${appId}/public/data/games`).onSnapshot(s => {
+                const l = document.getElementById('games-list'); l.innerHTML = '';
+                let g = []; s.forEach(d=>g.push({id:d.id, ...d.data()}));
+                g.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+                g.forEach(gm => {
+                    l.innerHTML += `<div class="flex items-center gap-3 bg-slate-900 p-3 rounded border border-slate-700"><img src="${gm.image}" class="w-10 h-10 rounded"><div class="flex-1"><p class="text-sm font-bold">${gm.title}</p></div><button onclick="delGame('${gm.id}')" class="text-red-400"><i class="fas fa-trash"></i></button></div>`;
+                });
+            });
+        }
+        function delGame(id) { if(confirm("Delete?")) db.collection(`artifacts/${appId}/public/data/games`).doc(id).delete(); }
+
+        function saveSettings() {
+            const methods = document.getElementById('set-methods').value.split(',').map(s=>s.trim()).filter(s=>s);
+            const data = {
+                gameDuration: parseInt(document.getElementById('set-duration').value)||60,
+                gameReward: parseInt(document.getElementById('set-reward').value)||50,
+                referralBonus: parseInt(document.getElementById('set-refer').value)||500,
+                
+                // New Fields
+                watchAdReward: parseInt(document.getElementById('set-ad-reward').value)||50,
+                watchAdDelay: parseInt(document.getElementById('set-ad-delay').value)||15,
+                coinValue: document.getElementById('set-val').value || "₹1",
+
+                paymentMethods: methods,
+                socials: {
+                    telegram: document.getElementById('link-tg').value,
+                    youtube: document.getElementById('link-yt').value,
+                    instagram: document.getElementById('link-ig').value
+                }
+            };
+            db.collection(`artifacts/${appId}/public/data/settings`).doc('global').set(data, {merge:true})
+            .then(()=>showToast("Settings Saved!","success"));
+        }
+
+        function loadSettings() {
+            db.collection(`artifacts/${appId}/public/data/settings`).doc('global').get().then(d => {
+                if(d.exists) {
+                    const data = d.data();
+                    document.getElementById('set-duration').value = data.gameDuration||60;
+                    document.getElementById('set-reward').value = data.gameReward||50;
+                    document.getElementById('set-refer').value = data.referralBonus||500;
+                    
+                    document.getElementById('set-ad-reward').value = data.watchAdReward||50;
+                    document.getElementById('set-ad-delay').value = data.watchAdDelay||15;
+                    document.getElementById('set-val').value = data.coinValue||"₹1";
+
+                    document.getElementById('set-methods').value = (data.paymentMethods||[]).join(', ');
+                    if(data.socials) {
+                        document.getElementById('link-tg').value = data.socials.telegram||'';
+                        document.getElementById('link-yt').value = data.socials.youtube||'';
+                        document.getElementById('link-ig').value = data.socials.instagram||'';
+                    }
+                }
+            });
+        }
+
+        function loadWithdrawals() {
+            db.collection(`artifacts/${appId}/public/data/withdrawals`).onSnapshot(s => {
+                const l = document.getElementById('wd-list'); l.innerHTML = '';
+                let r = []; s.forEach(d=>{ if(d.data().status==='pending') r.push({id:d.id, ...d.data()}) });
+                if(r.length===0) return l.innerHTML='<p class="text-center text-slate-500 mt-10">All Clear</p>';
+                r.sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
+                r.forEach(req => {
+                    l.innerHTML += `<div class="bg-slate-700/40 p-4 rounded border border-slate-600"><div class="flex justify-between"><b>${req.amount} Coins</b> <span class="uppercase text-xs bg-slate-600 px-2 py-1 rounded">${req.method}</span></div><div class="text-sm text-green-400 mt-1 font-mono">${req.details}</div><div class="flex gap-2 mt-2"><button onclick="upd('${req.id}','paid')" class="flex-1 bg-green-600 py-1 rounded text-sm">Pay</button><button onclick="upd('${req.id}','rejected')" class="flex-1 bg-red-600 py-1 rounded text-sm">Reject</button></div></div>`;
+                });
+            });
+        }
+        function upd(id, st) { db.collection(`artifacts/${appId}/public/data/withdrawals`).doc(id).update({status:st}); }
+
+        function showToast(m,t='info') {
+            const d=document.createElement('div'); d.className='toast'; 
+            d.innerHTML=`<i class="fas ${t==='success'?'fa-check':'fa-info-circle'} mr-2"></i> ${m}`;
+            document.getElementById('toast-container').appendChild(d);
+            setTimeout(()=>d.classList.add('show'),10); setTimeout(()=>{d.classList.remove('show');setTimeout(()=>d.remove(),300)},3000);
+        }
+    </script>
+</body>
+</html>
