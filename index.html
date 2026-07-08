@@ -15,7 +15,6 @@
 
     <style>
         body { font-family: 'Poppins', sans-serif; background-color: #0f172a; color: #fff; user-select: none; }
-        ::-webkit-scrollbar { width: 5px; }
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; background: #1e293b; border-left: 4px solid #6366f1; padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); display: flex; align-items: center; opacity: 0; transition: opacity 0.3s; }
         .toast.show { opacity: 1; }
         .nav-item.active { color: #6366f1; }
@@ -23,33 +22,35 @@
     </style>
 </head>
 <body class="h-screen flex flex-col relative">
+
     <div id="toast-container"></div>
 
+    <!-- Auth Screen -->
     <div id="auth-screen" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center p-6">
         <h1 class="text-3xl font-bold mb-2 text-indigo-400">ZiroGame</h1>
         <button onclick="initAuth()" class="w-full max-w-xs bg-indigo-600 py-3 rounded-xl font-bold">Bắt đầu ngay</button>
     </div>
 
+    <!-- Main App -->
     <div id="main-app" class="hidden flex-1 flex flex-col pb-16">
         <header class="p-4 bg-slate-800 flex justify-between border-b border-slate-700">
-            <div><p class="text-[10px] text-slate-400">Số dư</p><p class="font-bold" id="header-balance">0</p></div>
+            <div><p class="text-[10px] text-slate-400 uppercase">Số dư</p><p class="font-bold" id="header-balance">0</p></div>
         </header>
 
         <main class="flex-1 overflow-y-auto p-4">
             <div id="home-page" class="page-section">
-                <!-- SỬA LỖI ĐẾM NGƯỢC Ở ĐÂY -->
+                <!-- Đếm ngược: ID giữ nguyên để JS hoạt động -->
                 <div id="watch-earn-card" onclick="triggerWatchEarn()" class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-6 mb-6 cursor-pointer">
-                    <h2 class="text-xl font-bold">Xem & Nhận</h2>
-                    <p class="text-sm text-blue-100">Nhận <span id="ad-reward-disp">50</span> xu</p>
-                    <p id="ad-timer-msg" class="text-xs text-yellow-300 mt-2 hidden">Vui lòng đợi: <span id="ad-cooldown-timer">0</span>s</p>
+                    <h2 class="text-xl font-bold"><i class="fas fa-play-circle mr-2"></i>Xem & Nhận</h2>
+                    <p class="text-sm text-blue-100">Xem quảng cáo nhận <span id="ad-reward-disp">50</span> xu</p>
+                    <p id="ad-timer-msg" class="text-xs text-yellow-300 mt-2 hidden">Đợi: <span id="ad-cooldown-timer">0</span>s</p>
                 </div>
 
                 <div onclick="showPage('games-list-page')" class="bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl p-6 mb-6 cursor-pointer">
-                    <h2 class="text-xl font-bold">Chơi game</h2>
+                    <h2 class="text-xl font-bold"><i class="fas fa-gamepad mr-2"></i>Chơi game</h2>
                 </div>
             </div>
 
-            <!-- Các trang khác -->
             <div id="games-list-page" class="page-section hidden">
                 <button onclick="showPage('home-page')" class="mb-4 text-sm"><i class="fas fa-arrow-left"></i> Quay lại</button>
                 <div id="games-list" class="grid grid-cols-2 gap-4"></div>
@@ -60,6 +61,7 @@
     <script>
         const firebaseConfig = { apiKey: "AIzaSyA2CtHpu_lm_tgrRshFzq-jD-PNrXzUrhM", authDomain: "zirogame-e078c.firebaseapp.com", databaseURL: "https://zirogame-e078c-default-rtdb.firebaseio.com", projectId: "zirogame-e078c", storageBucket: "zirogame-e078c.firebasestorage.app", messagingSenderId: "932469574208", appId: "1:932469574208:web:4ddf6635c3795f424dada5" };
         const appId = "1:932469574208:web:4ddf6635c3795f424dada5";
+        
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
@@ -68,13 +70,14 @@
         let SETTINGS = { watchAdReward: 50, watchAdDelay: 15 };
 
         async function initAuth() { await auth.signInAnonymously(); }
-        auth.onAuthStateChanged(u => { if(u) { currentUser = u; document.getElementById('auth-screen').classList.add('hidden'); document.getElementById('main-app').classList.remove('hidden'); } });
+        auth.onAuthStateChanged(u => { if(u) { document.getElementById('auth-screen').classList.add('hidden'); document.getElementById('main-app').classList.remove('hidden'); } });
 
+        // Logic Đếm ngược chuẩn
         function triggerWatchEarn() {
             const now = Date.now();
             const elapsed = (now - lastAdWatchTime) / 1000;
             if (elapsed < SETTINGS.watchAdDelay) {
-                showToast(`Vui lòng đợi ${Math.ceil(SETTINGS.watchAdDelay - elapsed)}s`, "error");
+                showToast("Vui lòng đợi " + Math.ceil(SETTINGS.watchAdDelay - elapsed) + " giây", "error");
                 return;
             }
             showGigaAd(() => {
@@ -105,11 +108,7 @@
             }, 1000);
         }
 
-        function showGigaAd(cb) {
-            if(window.showGiga) window.showGiga().then(cb).catch(()=>{});
-            else cb();
-        }
-
+        function showGigaAd(cb) { if(window.showGiga) window.showGiga().then(cb).catch(()=>{}); else cb(); }
         function addCoins(amt) { showToast("Đã cộng " + amt + " xu", "success"); }
         function showPage(id) { document.querySelectorAll('.page-section').forEach(e=>e.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
         function showToast(m, t) {
