@@ -11,53 +11,45 @@
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
-
     <script src='//libtl.com/sdk.js' data-zone='11257322' data-sdk='show_11257322'></script>
 
     <style>
         body { font-family: 'Poppins', sans-serif; background-color: #0f172a; color: #fff; user-select: none; }
         ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 5px; }
-        .pulse-gold-btn { animation: pulse-gold 2s infinite; }
-        @keyframes pulse-gold { 0% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(234, 179, 8, 0); } 100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); } }
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; background: #1e293b; border-left: 4px solid #6366f1; padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); display: flex; align-items: center; opacity: 0; transition: opacity 0.3s; }
         .toast.show { opacity: 1; }
         .nav-item.active { color: #6366f1; }
-        .game-frame { width: 100%; height: 100%; border: none; }
         .disabled-card { opacity: 0.5; pointer-events: none; filter: grayscale(1); }
     </style>
 </head>
 <body class="h-screen flex flex-col relative">
-
     <div id="toast-container"></div>
 
-    <!-- Auth -->
     <div id="auth-screen" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center p-6">
-        <h1 class="text-3xl font-bold mb-8 text-indigo-400">ZiroGame</h1>
-        <button onclick="initAuth()" class="w-full max-w-xs bg-indigo-600 py-3 rounded-xl font-bold text-lg">Bắt đầu ngay</button>
+        <h1 class="text-3xl font-bold mb-2 text-indigo-400">ZiroGame</h1>
+        <button onclick="initAuth()" class="w-full max-w-xs bg-indigo-600 py-3 rounded-xl font-bold">Bắt đầu ngay</button>
     </div>
 
-    <!-- Main App -->
     <div id="main-app" class="hidden flex-1 flex flex-col pb-16">
+        <header class="p-4 bg-slate-800 flex justify-between border-b border-slate-700">
+            <div><p class="text-[10px] text-slate-400">Số dư</p><p class="font-bold" id="header-balance">0</p></div>
+        </header>
+
         <main class="flex-1 overflow-y-auto p-4">
             <div id="home-page" class="page-section">
-                <!-- Watch & Earn -->
+                <!-- SỬA LỖI ĐẾM NGƯỢC Ở ĐÂY -->
                 <div id="watch-earn-card" onclick="triggerWatchEarn()" class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-6 mb-6 cursor-pointer">
-                    <h2 class="text-xl font-bold text-white"><i class="fas fa-play-circle mr-2"></i>Xem & Nhận</h2>
-                    <p class="text-blue-100 text-sm">Xem quảng cáo nhận <span id="ad-reward-disp">50</span> xu</p>
-                    <!-- Đếm ngược -->
+                    <h2 class="text-xl font-bold">Xem & Nhận</h2>
+                    <p class="text-sm text-blue-100">Nhận <span id="ad-reward-disp">50</span> xu</p>
                     <p id="ad-timer-msg" class="text-xs text-yellow-300 mt-2 hidden">Vui lòng đợi: <span id="ad-cooldown-timer">0</span>s</p>
                 </div>
 
-                <!-- Play Games -->
                 <div onclick="showPage('games-list-page')" class="bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl p-6 mb-6 cursor-pointer">
-                    <h2 class="text-xl font-bold text-white"><i class="fas fa-gamepad mr-2"></i>Chơi game</h2>
-                    <p class="text-orange-100 text-sm">Chơi <span id="game-time-disp">60</span>s nhận thưởng</p>
+                    <h2 class="text-xl font-bold">Chơi game</h2>
                 </div>
             </div>
 
-            <!-- Các trang khác ẩn mặc định -->
+            <!-- Các trang khác -->
             <div id="games-list-page" class="page-section hidden">
                 <button onclick="showPage('home-page')" class="mb-4 text-sm"><i class="fas fa-arrow-left"></i> Quay lại</button>
                 <div id="games-list" class="grid grid-cols-2 gap-4"></div>
@@ -72,33 +64,23 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        let currentUser = null, lastAdWatchTime = 0;
-        let SETTINGS = { watchAdReward: 50, watchAdDelay: 15, gameDuration: 60 };
+        let lastAdWatchTime = 0;
+        let SETTINGS = { watchAdReward: 50, watchAdDelay: 15 };
 
         async function initAuth() { await auth.signInAnonymously(); }
-        auth.onAuthStateChanged(async (u) => {
-            if (u) {
-                currentUser = u;
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-            }
-        });
+        auth.onAuthStateChanged(u => { if(u) { currentUser = u; document.getElementById('auth-screen').classList.add('hidden'); document.getElementById('main-app').classList.remove('hidden'); } });
 
         function triggerWatchEarn() {
             const now = Date.now();
             const elapsed = (now - lastAdWatchTime) / 1000;
-            const cooldown = SETTINGS.watchAdDelay;
-
-            if (elapsed < cooldown) {
-                showToast(`Vui lòng đợi ${Math.ceil(cooldown - elapsed)} giây`, "error");
+            if (elapsed < SETTINGS.watchAdDelay) {
+                showToast(`Vui lòng đợi ${Math.ceil(SETTINGS.watchAdDelay - elapsed)}s`, "error");
                 return;
             }
-
-            // Gọi quảng cáo
-            showGigaAd(async () => {
+            showGigaAd(() => {
                 lastAdWatchTime = Date.now();
-                startCooldownTimer(cooldown);
-                showToast("Nhận thưởng thành công!", "success");
+                startCooldownTimer(SETTINGS.watchAdDelay);
+                addCoins(SETTINGS.watchAdReward);
             });
         }
 
@@ -109,7 +91,6 @@
             
             card.classList.add('disabled-card');
             msg.classList.remove('hidden');
-            
             let left = seconds;
             disp.innerText = left;
 
@@ -125,19 +106,15 @@
         }
 
         function showGigaAd(cb) {
-            if(window.showGiga) {
-                window.showGiga().then(cb).catch(() => showToast("Đã đóng quảng cáo", "info"));
-            } else { cb(); }
+            if(window.showGiga) window.showGiga().then(cb).catch(()=>{});
+            else cb();
         }
 
-        function showPage(id) {
-            document.querySelectorAll('.page-section').forEach(e=>e.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-        }
-
-        function showToast(m,t) {
-            const d=document.createElement('div'); d.className='toast show'; d.innerHTML=m;
-            document.getElementById('toast-container').appendChild(d); setTimeout(()=>d.remove(),3000);
+        function addCoins(amt) { showToast("Đã cộng " + amt + " xu", "success"); }
+        function showPage(id) { document.querySelectorAll('.page-section').forEach(e=>e.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+        function showToast(m, t) {
+            const d = document.createElement('div'); d.className = 'toast show'; d.innerHTML = m;
+            document.getElementById('toast-container').appendChild(d); setTimeout(() => d.remove(), 3000);
         }
     </script>
 </body>
