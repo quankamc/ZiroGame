@@ -104,14 +104,14 @@
                 <div class="bg-slate-800 rounded-2xl p-6 mb-6 text-center border border-slate-700">
                     <p class="text-slate-400 text-sm mb-1">Số dư hiện tại</p>
                     <h1 class="text-4xl font-bold text-yellow-400 mb-2" id="wallet-balance">0</h1>
-                    <p class="text-xs text-green-400 font-bold bg-green-400/10 inline-block px-3 py-1 rounded-full">Tỷ giá: 100 Xu = <span id="val-disp">1 VNĐ</span></p>
+                    <p class="text-xs text-green-400 font-bold bg-green-400/10 inline-block px-3 py-1 rounded-full">Tỷ giá: 10000 Xu = <span id="val-disp">10.000 VNĐ</span></p>
                 </div>
                 <div class="bg-slate-800 rounded-xl p-4">
                     <h3 class="font-bold mb-4 text-indigo-400">Rút tiền</h3>
                     <form onsubmit="handleWithdraw(event)" class="space-y-3">
                         <select id="withdraw-method" class="w-full bg-slate-700 border-none rounded-lg p-3 text-white"></select>
                         <input type="text" id="withdraw-details" required placeholder="Nhập SĐT hoặc STK" class="w-full bg-slate-700 border-none rounded-lg p-3 text-white">
-                        <input type="number" id="withdraw-amount" required min="100" placeholder="Số lượng (Xu)" class="w-full bg-slate-700 border-none rounded-lg p-3 text-white">
+                        <input type="number" id="withdraw-amount" required min="10000" placeholder="Số lượng (Xu)" class="w-full bg-slate-700 border-none rounded-lg p-3 text-white">
                         <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">Gửi yêu cầu</button>
                     </form>
                 </div>
@@ -186,7 +186,7 @@
         const db = firebase.firestore();
         let currentUser = null, userData = null, gameTimerInterval = null, secondsPlayed = 0;
         let lastAdWatchTime = 0;
-        let SETTINGS = { gameDuration: 60, gameReward: 50, referBonus: 500, watchAdReward: 50, watchAdDelay: 15, coinValue: "1 VNĐ", socials: {}, paymentMethods: ['MOMO','STK'] };
+        let SETTINGS = { gameDuration: 60, gameReward: 50, referBonus: 500, watchAdReward: 50, watchAdDelay: 15, coinValue: "10000 VNĐ", socials: {}, paymentMethods: ['MOMO','STK'] };
         async function initAuth() { try { await auth.signInAnonymously(); } catch(e) { fallbackMode(); } }
         auth.onAuthStateChanged(async (u) => {
             if (u) {
