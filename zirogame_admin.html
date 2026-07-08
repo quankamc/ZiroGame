@@ -167,7 +167,7 @@
         async function verifyAdmin(user) {
             try {
                 const doc = await db.collection(`artifacts/${appId}/admins`).doc(user.uid).get();
-                if(doc.exists && doc.data().role === 'admin') { showDashboard(); initData(); showToast("Welcome Admin", "success"); }
+                if(doc.exists && doc.data().role === 'admins') { showDashboard(); initData(); showToast("Welcome Admin", "success"); }
                 else throw new Error("Not Admin");
             } catch(e) { auth.signOut(); showToast("Access Denied", "error"); }
         }
