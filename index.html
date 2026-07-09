@@ -396,7 +396,7 @@
         }
         function fallbackMode() {
             if(!userData) userData={balance:0, referralCode:'DEMO', totalEarned:0}; updateHeader();
-            document.getElementById('games-list').innerHTML='<p class="col-span-2 text-center text-slate-500">Game mẫu</p>';
+            document.getElementById('games-list').innerHTML='<p class="col-span-2 text-center text-slate-500">Chưa có game nào!</p>';
         }
         function copyRefCode() { navigator.clipboard.writeText(userData.referralCode); showToast("Đã sao chép","success"); }
         function showToast(m,t) {
