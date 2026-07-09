@@ -7,14 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
     <script src='//libtl.com/sdk.js' data-zone='11257322' data-sdk='show_11257322'></script>
-
     <style>
         body { font-family: 'Poppins', sans-serif; background-color: #0f172a; color: #fff; user-select: none; }
         ::-webkit-scrollbar { width: 5px; }
@@ -26,13 +22,10 @@
         .toast.show { opacity: 1; }
         .nav-item.active { color: #6366f1; }
         .game-frame { width: 100%; height: 100%; border: none; }
-        .disabled-card { opacity: 0.5; pointer-events: none; filter: grayscale(1); }
     </style>
 </head>
 <body class="h-screen flex flex-col relative">
-
     <div id="toast-container"></div>
-
     <div id="ad-overlay" class="hidden fixed inset-0 z-50 bg-slate-900/90 flex flex-col items-center justify-center">
         <div class="bg-slate-800 p-8 rounded-2xl border border-slate-700 text-center w-4/5">
             <h2 class="text-xl font-bold mb-4">Đang tải quảng cáo...</h2>
@@ -42,17 +35,14 @@
             <p class="text-sm text-slate-400">Vui lòng đợi...</p>
         </div>
     </div>
-
     <div id="auth-screen" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center p-6">
         <div class="w-24 h-24 bg-indigo-600 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/50">
-            <a href="#"><img src="images/logogame.png" alt="Logo Game"></a>
+            <img src="images/logogame.png" alt="Logo">
         </div>
         <h1 class="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">ZiroGame</h1>
         <p class="text-slate-400 mb-8 text-center">Chơi game, Xem video và Kiếm tiền thật!</p>
-        <button onclick="initAuth()" class="w-full max-w-xs bg-indigo-600 hover:bg-indigo-700 py-3 rounded-xl font-bold text-lg shadow-lg">Bắt đầu kiếm tiền</button>
-        <p class="text-xs text-slate-500 mt-4">Đang kết nối...</p>
+        <div id="telegram-login-button"></div>
     </div>
-
     <div id="main-app" class="hidden flex-1 flex flex-col overflow-hidden pb-16">
         <header class="flex justify-between items-center p-4 bg-slate-800/80 backdrop-blur sticky top-0 z-20 border-b border-slate-700">
             <div class="flex items-center">
@@ -66,7 +56,6 @@
             </div>
             <div class="font-bold text-indigo-400">ZiroGame</div>
         </header>
-
         <main class="flex-1 overflow-y-auto p-4 relative">
             <div id="home-page" class="page-section">
                 <div id="social-links-container" class="flex justify-center gap-4 mb-6 hidden"></div>
@@ -77,7 +66,6 @@
                         <div class="bg-slate-700 text-white font-bold text-xs py-2 px-4 rounded-lg inline-block mb-2">NHẬN <span id="ad-reward-disp">10</span> XU</div>
                         <p id="watch-timer-text" class="text-slate-500 text-xs" style="display:none">Xem tiếp sau: <span id="ad-timer">0</span>s</p>
                     </div>
-                    <i class="fas fa-video absolute -bottom-4 -right-4 text-8xl text-white opacity-5"></i>
                 </div>
                 <div onclick="showPage('games-list-page')" class="bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl p-6 mb-6 relative overflow-hidden shadow-lg active:scale-95 transition cursor-pointer">
                     <div class="relative z-10">
@@ -85,7 +73,6 @@
                         <p class="text-orange-100 text-sm">Chơi game 60s để kiếm xu.</p>
                         <div class="mt-4 inline-block bg-white/20 px-4 py-1 rounded-full text-xs font-bold backdrop-blur-sm">NHẬN 20 XU</div>
                     </div>
-                    <i class="fas fa-ghost absolute -bottom-4 -right-4 text-8xl text-white opacity-10"></i>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
@@ -98,14 +85,10 @@
                     </div>
                 </div>
             </div>
-
             <div id="games-list-page" class="page-section hidden">
                 <button onclick="showPage('home-page')" class="mb-4 text-slate-400 text-sm flex items-center"><i class="fas fa-arrow-left mr-2"></i> Quay lại</button>
-                <div id="games-list" class="grid grid-cols-2 gap-4">
-                    <div class="col-span-2 text-center py-10 text-slate-500">Đang tải game...</div>
-                </div>
+                <div id="games-list" class="grid grid-cols-2 gap-4"></div>
             </div>
-
             <div id="wallet-page" class="page-section hidden">
                 <div class="bg-slate-800 rounded-2xl p-6 mb-6 text-center border border-slate-700">
                     <p class="text-slate-400 text-sm mb-1">Số xu hiện tại</p>
@@ -115,51 +98,26 @@
                 <div class="bg-slate-800 rounded-xl p-4">
                     <h3 class="font-bold mb-4 text-indigo-400">Thanh Toán</h3>
                     <form onsubmit="handleWithdraw(event)" class="space-y-3">
-                        <div class="bg-slate-700 p-3 rounded-lg flex items-center border border-pink-500">
-                            <img src="images/momo.png" class="w-10 h-10 rounded-lg mr-3">
-                            <div>
-                                <p class="font-bold text-white">Ví MoMo</p>
-                                <p class="text-[10px] text-slate-300">Nhập đúng số điện thoại đăng ký MoMo!</p>
-                            </div>
-                        </div>
                         <input type="text" id="withdraw-details" required placeholder="Nhập số điện thoại MOMO" class="w-full bg-slate-700 border-none rounded-lg p-3 text-white">
                         <input type="number" id="withdraw-amount" required min="10000" placeholder="Số lượng (Xu)" class="w-full bg-slate-700 border-none rounded-lg p-3 text-white">
                         <button type="submit" id="withdraw-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">Gửi Yêu Cầu</button>
                     </form>
-                    <p class="text-[10px] text-slate-500 text-center mt-3 italic">* Thời gian duyệt rút tiền từ 1 - 3 ngày làm việc.</p>
                 </div>
             </div>
-
             <div id="history-page" class="page-section hidden">
                 <h3 class="font-bold mb-4 text-white">Lịch sử thanh toán</h3>
-                <div id="tx-history" class="space-y-2"><p class="text-center text-slate-500 text-sm py-10">Chưa có giao dịch.</p></div>
+                <div id="tx-history" class="space-y-2"></div>
             </div>
-
             <div id="refer-page" class="page-section hidden">
                 <div class="text-center mt-8 p-4">
-                    <div class="mb-6">
-                        <div class="text-indigo-400 text-5xl mb-3"><i class="fas fa-users"></i></div>
-                        <h2 class="text-2xl font-bold text-white mb-1">Mời bạn bè</h2>
-                        <p class="text-slate-400 text-sm">Nhận <span class="text-yellow-400 font-bold" id="refer-bonus-disp">500</span> Xu mỗi lượt.</p>
-                    </div>
+                    <h2 class="text-2xl font-bold text-white mb-1">Mời bạn bè</h2>
                     <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 mb-6">
-                        <p class="text-[10px] text-slate-500 uppercase tracking-widest mb-2 font-bold">Mã giới thiệu của bạn</p>
-                        <div class="flex justify-center items-center gap-3">
-                            <span id="my-ref-code" class="font-mono text-2xl font-bold text-white tracking-wider">...</span>
-                            <button onclick="copyRefCode()" class="bg-indigo-600/20 text-indigo-400 w-10 h-10 rounded-lg hover:bg-indigo-600 hover:text-white transition"><i class="fas fa-copy"></i></button>
-                        </div>
-                    </div>
-                    <div class="text-left mb-4">
-                        <p class="text-xs text-slate-500 mb-2 font-bold uppercase">Nhập mã người giới thiệu</p>
-                        <div class="flex gap-2">
-                            <input type="text" id="input-ref-code" placeholder="Nhập mã..." class="bg-slate-800 border border-slate-700 w-full rounded-xl p-4 text-white placeholder-slate-600 outline-none focus:border-indigo-500 transition uppercase">
-                            <button onclick="redeemReferral()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 rounded-xl transition shadow-lg shadow-indigo-600/20">Áp dụng</button>
-                        </div>
+                        <span id="my-ref-code" class="font-mono text-2xl font-bold text-white">...</span>
+                        <button onclick="copyRefCode()" class="ml-2 text-indigo-400"><i class="fas fa-copy"></i></button>
                     </div>
                 </div>
             </div>
         </main>
-
         <nav class="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 flex justify-around p-2 pb-6 z-30">
             <button onclick="showPage('home-page')" class="nav-item active flex flex-col items-center text-slate-500 w-1/4" id="nav-home"><i class="fas fa-home text-xl mb-1"></i> <span class="text-[10px]">Trang chủ</span></button>
             <button onclick="showPage('refer-page')" class="nav-item flex flex-col items-center text-slate-500 w-1/4" id="nav-refer"><i class="fas fa-share-alt text-xl mb-1"></i> <span class="text-[10px]">Mời</span></button>
@@ -167,218 +125,175 @@
             <button onclick="showPage('history-page')" class="nav-item flex flex-col items-center text-slate-500 w-1/4" id="nav-history"><i class="fas fa-history text-xl mb-1"></i> <span class="text-[10px]">Lịch sử</span></button>
         </nav>
     </div>
-
     <div id="play-overlay" class="hidden fixed inset-0 z-50 bg-slate-900 flex flex-col">
         <div class="flex justify-between items-center p-3 bg-slate-800 z-10 shadow-lg">
             <button onclick="exitGame()" class="text-white bg-red-600 px-3 py-1 rounded text-xs font-bold">THOÁT</button>
-            <div class="flex items-center gap-2">
-                <i class="fas fa-clock text-slate-400 text-xs"></i>
-                <div class="bg-black px-3 py-1 rounded text-yellow-400 font-mono font-bold" id="game-timer">00:00</div>
-            </div>
+            <div id="game-timer" class="text-yellow-400 font-bold">00:00</div>
         </div>
         <div id="top-claim-container" class="hidden absolute top-16 left-0 right-0 z-20 flex justify-center px-4">
-            <button onclick="triggerClaimReward()" class="bg-gradient-to-r from-yellow-500 to-orange-600 text-white font-bold text-lg py-3 px-8 rounded-full shadow-lg border-2 border-yellow-300 pulse-gold-btn flex items-center gap-2"><i class="fas fa-gift"></i> NHẬN XU</button>
+            <button onclick="triggerClaimReward()" class="bg-gradient-to-r from-yellow-500 to-orange-600 text-white font-bold text-lg py-3 px-8 rounded-full shadow-lg border-2 border-yellow-300 pulse-gold-btn">NHẬN XU</button>
         </div>
-        <div class="flex-1 bg-black relative w-full h-full">
-            <iframe id="game-iframe" src="" class="game-frame" sandbox="allow-scripts allow-same-origin"></iframe>
-        </div>
+        <iframe id="game-iframe" src="" class="game-frame" sandbox="allow-scripts allow-same-origin"></iframe>
     </div>
-
     <script>
         const firebaseConfig = { apiKey: "AIzaSyA2CtHpu_lm_tgrRshFzq-jD-PNrXzUrhM", authDomain: "zirogame-e078c.firebaseapp.com", databaseURL: "https://zirogame-e078c-default-rtdb.firebaseio.com", projectId: "zirogame-e078c", storageBucket: "zirogame-e078c.firebasestorage.app", messagingSenderId: "932469574208", appId: "1:932469574208:web:4ddf6635c3795f424dada5" };
-        const appId = "1:932469574208:web:4ddf6635c3795f424dada5";
         firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
         const db = firebase.firestore();
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-
+        const appId = "1:932469574208:web:4ddf6635c3795f424dada5";
         let currentUser = null, userData = null, gameTimerInterval = null, secondsPlayed = 0, adTimerInterval = null, adSecondsLeft = 0;
-        let SETTINGS = { gameDuration: 30, gameReward: 50, referBonus: 500, watchAdReward: 50, watchAdDelay: 15, coinValue: "10000 VNĐ", socials: {}, paymentMethods: ['MOMO'], lastWithdrawTime: null };
-        
-        async function initAuth() {
-            const user = tg.initDataUnsafe.user;
-            if (!user) { showToast("Vui lòng mở qua Telegram!", "error"); return; }
-            const telegramUid = `tg_${user.id}`;
-            currentUser = { uid: telegramUid, username: user.username || "User" };
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('main-app').classList.remove('hidden');
-            await loadSettings();
-            await loadProfile(telegramUid);
+        let SETTINGS = { gameDuration: 30, gameReward: 50, referBonus: 500, watchAdReward: 50, watchAdDelay: 15, coinValue: "10000 VNĐ", socials: {} };
+
+        function onTelegramAuth(user) {
+            auth.signInWithCustomToken(user.id.toString()).then(() => {
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+            }).catch(e => {
+                console.error(e);
+            });
         }
+
+        const script = document.createElement('script');
+        script.src = "https://telegram.org/js/telegram-widget.js?22";
+        script.setAttribute('data-telegram-login', 'YOUR_BOT_USERNAME');
+        script.setAttribute('data-size', 'large');
+        script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+        script.setAttribute('data-request-access', 'write');
+        document.getElementById('telegram-login-button').appendChild(script);
+
+        auth.onAuthStateChanged(async (u) => {
+            if (u) {
+                currentUser = u;
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                await loadSettings();
+                loadProfile(u.uid);
+            }
+        });
 
         async function loadSettings() {
-            try {
-                const doc = await db.collection(`artifacts/${appId}/public/data/settings`).doc('global').get();
-                if(doc.exists) {
-                    const d = doc.data();
-                    if(d.gameDuration) SETTINGS.gameDuration=d.gameDuration;
-                    if(d.gameReward) SETTINGS.gameReward=d.gameReward;
-                    if(d.referralBonus) SETTINGS.referBonus=d.referralBonus;
-                    if(d.watchAdReward) SETTINGS.watchAdReward=d.watchAdReward;
-                    if(d.watchAdDelay) SETTINGS.watchAdDelay=d.watchAdDelay;
-                    if(d.withdrawLimit) SETTINGS.withdrawLimit = d.withdrawLimit;
-                    if(d.coinValue) SETTINGS.coinValue=d.coinValue;
-                    if(d.socials) SETTINGS.socials=d.socials;
-                }
+            const doc = await db.collection(`artifacts/${appId}/public/data/settings`).doc('global').get();
+            if(doc.exists) {
+                const d = doc.data();
+                SETTINGS = {...SETTINGS, ...d};
                 updateUI();
-            } catch(e) {}
-        }
-        function updateUI() {
-            document.getElementById('ad-reward-disp').innerText = SETTINGS.watchAdReward;
-            document.getElementById('refer-bonus-disp').innerText = SETTINGS.referBonus;
-            document.getElementById('val-disp').innerText = SETTINGS.coinValue;
-            const sc = document.getElementById('social-links-container');
-            sc.innerHTML = '';
-            if(SETTINGS.socials) {
-                sc.classList.remove('hidden');
-                const s = SETTINGS.socials;
-                if(s.telegram) sc.innerHTML += `<a href="${s.telegram}" target="_blank" class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white"><i class="fab fa-telegram"></i></a>`;
-                if(s.youtube) sc.innerHTML += `<a href="${s.youtube}" target="_blank" class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white"><i class="fab fa-youtube"></i></a>`;
-                if(s.instagram) sc.innerHTML += `<a href="${s.instagram}" target="_blank" class="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center text-white"><i class="fab fa-instagram"></i></a>`;
             }
         }
+
+        function updateUI() {
+            document.getElementById('ad-reward-disp').innerText = SETTINGS.watchAdReward;
+            document.getElementById('val-disp').innerText = SETTINGS.coinValue;
+        }
+
         async function loadProfile(uid) {
             const ref = db.collection(`artifacts/${appId}/users/${uid}/profile`).doc('main');
             const doc = await ref.get();
             if(!doc.exists) {
                 const code = 'REF'+Math.floor(1000+Math.random()*9000);
-                userData = {uid, username: tg.initDataUnsafe.user.username, balance:0, referralCode:code, totalEarned:0, totalRefers:0, referredBy:null, lastWithdraw:null};
-                await ref.set(userData);
-            } else userData=doc.data();
-            updateHeader(); listenData(); loadGames(); loadHistory();
+                await ref.set({uid, balance:0, referralCode:code, totalEarned:0, totalRefers:0});
+                userData = {balance:0, referralCode:code, totalEarned:0, totalRefers:0};
+            } else userData = doc.data();
+            updateHeader();
+            loadGames();
+            loadHistory();
         }
-        function listenData() {
-            db.collection(`artifacts/${appId}/users/${currentUser.uid}/profile`).doc('main')
-            .onSnapshot(d=>{ if(d.exists) { userData=d.data(); updateHeader(); }});
-        }
+
         function updateHeader() {
-            if(!userData) return;
-            document.getElementById('header-balance').innerText=userData.balance;
-            document.getElementById('wallet-balance').innerText=userData.balance;
-            document.getElementById('total-earned-display').innerText=userData.totalEarned||0;
-            document.getElementById('total-refers-display').innerText=userData.totalRefers||0;
-            document.getElementById('my-ref-code').innerText=userData.referralCode||'...';
+            document.getElementById('header-balance').innerText = userData.balance;
+            document.getElementById('wallet-balance').innerText = userData.balance;
+            document.getElementById('total-earned-display').innerText = userData.totalEarned || 0;
+            document.getElementById('total-refers-display').innerText = userData.totalRefers || 0;
+            document.getElementById('my-ref-code').innerText = userData.referralCode || '...';
         }
+
         function showPage(id) {
-            document.querySelectorAll('.page-section').forEach(e=>e.classList.add('hidden'));
+            document.querySelectorAll('.page-section').forEach(e => e.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
-            document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
-            if(id.includes('home')) document.getElementById('nav-home').classList.add('active');
-            if(id.includes('refer')) document.getElementById('nav-refer').classList.add('active');
-            if(id.includes('wallet')) document.getElementById('nav-wallet').classList.add('active');
-            if(id.includes('history')) document.getElementById('nav-history').classList.add('active');
         }
-        function startAdTimer(seconds) {
-            adSecondsLeft = seconds;
-            const timerDisplay = document.getElementById('ad-timer');
-            const timerText = document.getElementById('watch-timer-text');
-            if (adTimerInterval) clearInterval(adTimerInterval);
-            timerText.style.display = 'block';
-            timerDisplay.innerText = adSecondsLeft;
-            adTimerInterval = setInterval(() => {
-                adSecondsLeft--;
-                if (adSecondsLeft >= 0) { timerDisplay.innerText = adSecondsLeft; }
-                else { clearInterval(adTimerInterval); timerText.style.display = 'none'; }
-            }, 1000);
-        }
-        function triggerWatchEarn() {
-            showGigaAd(async () => {
-                await addCoins(SETTINGS.watchAdReward);
-                startAdTimer(SETTINGS.watchAdDelay);
-            });
-        }
+
         function showGigaAd(cb) {
             if (typeof show_11257322 === 'function') {
                 const overlay = document.getElementById('ad-overlay');
                 overlay.classList.remove('hidden');
-                show_11257322().then(() => { overlay.classList.add('hidden'); if(cb) cb(); })
-                .catch((err) => { overlay.classList.add('hidden'); showToast("Thử lại sau", "error"); });
-            } else { showToast("Đang kết nối...", "info"); }
+                show_11257322().then(() => { overlay.classList.add('hidden'); if(cb) cb(); }).catch(() => { overlay.classList.add('hidden'); });
+            } else { if(cb) cb(); }
         }
-        function initiateGamePlay(url) {
-            showGigaAd(() => {
-                document.getElementById('game-iframe').src = url || 'about:blank';
-                document.getElementById('play-overlay').classList.remove('hidden');
-                document.getElementById('top-claim-container').classList.add('hidden');
-                startGameTimer();
+
+        function triggerWatchEarn() {
+            showGigaAd(async () => {
+                const ref = db.collection(`artifacts/${appId}/users/${currentUser.uid}/profile`).doc('main');
+                await ref.update({balance: firebase.firestore.FieldValue.increment(SETTINGS.watchAdReward)});
+                showToast("Đã nhận " + SETTINGS.watchAdReward + " xu!", "success");
             });
         }
-        function startGameTimer() {
+
+        function initiateGamePlay(url) {
+            document.getElementById('game-iframe').src = url;
+            document.getElementById('play-overlay').classList.remove('hidden');
             secondsPlayed = 0;
-            document.getElementById('game-timer').innerText = "00:00";
-            if(gameTimerInterval) clearInterval(gameTimerInterval);
             gameTimerInterval = setInterval(() => {
                 secondsPlayed++;
-                const m = Math.floor(secondsPlayed / 60).toString().padStart(2, '0');
-                const s = (secondsPlayed % 60).toString().padStart(2, '0');
-                document.getElementById('game-timer').innerText = `${m}:${s}`;
-                if(secondsPlayed >= 30) {
-                    document.getElementById('top-claim-container').classList.remove('hidden');
-                    if(navigator.vibrate) navigator.vibrate(200);
-                }
+                if(secondsPlayed >= 30) document.getElementById('top-claim-container').classList.remove('hidden');
             }, 1000);
         }
+
         function triggerClaimReward() {
-            document.getElementById('top-claim-container').classList.add('hidden');
             showGigaAd(async () => {
-                await addCoins(20);
-                secondsPlayed = 0;
-                document.getElementById('game-timer').innerText = "00:00";
+                const ref = db.collection(`artifacts/${appId}/users/${currentUser.uid}/profile`).doc('main');
+                await ref.update({balance: firebase.firestore.FieldValue.increment(20)});
+                document.getElementById('top-claim-container').classList.add('hidden');
             });
         }
+
         function exitGame() {
             document.getElementById('play-overlay').classList.add('hidden');
             document.getElementById('game-iframe').src = '';
             clearInterval(gameTimerInterval);
         }
-        async function addCoins(amt) {
-            const ref = db.collection(`artifacts/${appId}/users/${currentUser.uid}/profile`).doc('main');
-            await db.runTransaction(async t => {
-                const d = await t.get(ref);
-                t.update(ref, {balance: (d.data().balance||0)+amt, totalEarned: (d.data().totalEarned||0)+amt});
-            });
-            showToast(`+${amt} Xu!`, "success");
-        }
-        async function redeemReferral() {
-            const code = document.getElementById('input-ref-code').value.trim().toUpperCase();
-            if(!code || code===userData.referralCode || userData.referredBy) return showToast("Không hợp lệ", "error");
-            const ref = db.collection(`artifacts/${appId}/users/${currentUser.uid}/profile`).doc('main');
-            await ref.update({balance: firebase.firestore.FieldValue.increment(SETTINGS.referBonus), referredBy: code});
-            showToast("Thành công!", "success");
-        }
+
         function loadGames() {
-            db.collection(`artifacts/${appId}/public/data/games`).get().then(s=>{
-                const l = document.getElementById('games-list'); l.innerHTML = '';
-                s.forEach(d=>{
-                    const g=d.data();
-                    l.innerHTML+=`<div class="bg-slate-800 rounded-xl overflow-hidden shadow border border-slate-700 pb-2"><img src="${g.image}" class="w-full h-24 object-cover"><div class="p-2 text-center"><h4 class="font-bold text-sm truncate mb-2">${g.title}</h4><button onclick="initiateGamePlay('${g.url}')" class="bg-indigo-600 w-full py-1 text-xs rounded text-white">CHƠI</button></div></div>`;
+            db.collection(`artifacts/${appId}/public/data/games`).get().then(s => {
+                const l = document.getElementById('games-list');
+                s.forEach(d => {
+                    const g = d.data();
+                    l.innerHTML += `<div class="bg-slate-800 p-2 rounded-xl text-center"><img src="${g.image}" class="w-full h-20 object-cover mb-2 rounded"><button onclick="initiateGamePlay('${g.url}')" class="bg-indigo-600 w-full py-1 text-xs rounded text-white">CHƠI</button></div>`;
                 });
             });
         }
+
         function loadHistory() {
-            db.collection(`artifacts/${appId}/public/data/withdrawals`).onSnapshot(s=>{
-                const c = document.getElementById('tx-history'); c.innerHTML='';
-                let t=[]; s.forEach(d=>{if(d.data().userId===currentUser.uid)t.push(d.data())});
-                t.sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
-                t.forEach(x=>{
-                    c.innerHTML+=`<div class="bg-slate-800 p-3 rounded flex justify-between border border-slate-700 mb-2"><div><p class="text-sm font-bold uppercase">${x.method}</p><p class="text-xs text-slate-400">${x.details}</p></div><div class="text-right"><p class="font-bold">-${x.amount}</p></div></div>`;
+            db.collection(`artifacts/${appId}/public/data/withdrawals`).onSnapshot(s => {
+                const c = document.getElementById('tx-history');
+                c.innerHTML = '';
+                s.forEach(d => {
+                    const x = d.data();
+                    if(x.userId === currentUser.uid) {
+                        c.innerHTML += `<div class="bg-slate-800 p-3 rounded text-sm">${x.amount} Xu - ${x.status}</div>`;
+                    }
                 });
             });
         }
-        async function handleWithdraw(e) {
+
+        function handleWithdraw(e) {
             e.preventDefault();
             const a = parseInt(document.getElementById('withdraw-amount').value);
-            if(a > userData.balance) return showToast("Số dư không đủ", "error");
-            const uRef = db.collection(`artifacts/${appId}/users/${currentUser.uid}/profile`).doc('main');
-            await uRef.update({balance: firebase.firestore.FieldValue.increment(-a)});
-            await db.collection(`artifacts/${appId}/public/data/withdrawals`).add({userId: currentUser.uid, amount: a, method: 'MOMO', details: document.getElementById('withdraw-details').value, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()});
-            showToast("Đã gửi yêu cầu!", "success"); e.target.reset();
+            if(a <= userData.balance) {
+                db.collection(`artifacts/${appId}/public/data/withdrawals`).add({
+                    userId: currentUser.uid, amount: a, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast("Đã gửi yêu cầu!", "success");
+            }
         }
-        function copyRefCode() { navigator.clipboard.writeText(userData.referralCode); showToast("Đã sao chép","success"); }
-        function showToast(m,t) {
-            const d=document.createElement('div'); d.className='toast show'; d.innerHTML=`<span class="${t==='success'?'text-green-400':'text-red-400'} mr-2">●</span> ${m}`;
-            document.getElementById('toast-container').appendChild(d); setTimeout(()=>d.remove(),3000);
+
+        function showToast(m, t) {
+            const d = document.createElement('div');
+            d.className = 'toast show';
+            d.innerHTML = `<span class="${t==='success'?'text-green-400':'text-red-400'} mr-2">●</span> ${m}`;
+            document.getElementById('toast-container').appendChild(d);
+            setTimeout(() => d.remove(), 3000);
         }
+
+        function copyRefCode() { navigator.clipboard.writeText(userData.referralCode); showToast("Đã sao chép", "success"); }
     </script>
 </body>
 </html>
