@@ -7,11 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
     <script src='//libtl.com/sdk.js' data-zone='11257322' data-sdk='show_11257322'></script>
+
     <style>
         body { font-family: 'Poppins', sans-serif; background-color: #0f172a; color: #fff; user-select: none; }
         ::-webkit-scrollbar { width: 5px; }
@@ -41,8 +43,13 @@
     </div>
 
     <div id="auth-screen" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center p-6">
+        <div class="w-24 h-24 bg-indigo-600 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/50">
+            <a href="#"><img src="images/logogame.png" alt="Logo Game"></a>
+        </div>
         <h1 class="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">ZiroGame</h1>
-        <p class="text-slate-400 mb-8 text-center">Đang kết nối với Telegram...</p>
+        <p class="text-slate-400 mb-8 text-center">Chơi game, Xem video và Kiếm tiền thật!</p>
+        <button onclick="initAuth()" class="w-full max-w-xs bg-indigo-600 hover:bg-indigo-700 py-3 rounded-xl font-bold text-lg shadow-lg">Bắt đầu kiếm tiền</button>
+        <p class="text-xs text-slate-500 mt-4">Đang kết nối...</p>
     </div>
 
     <div id="main-app" class="hidden flex-1 flex flex-col overflow-hidden pb-16">
@@ -62,6 +69,7 @@
         <main class="flex-1 overflow-y-auto p-4 relative">
             <div id="home-page" class="page-section">
                 <div id="social-links-container" class="flex justify-center gap-4 mb-6 hidden"></div>
+
                 <div id="watch-earn-card" onclick="triggerWatchEarn()" class="bg-slate-800 rounded-2xl p-6 mb-6 relative overflow-hidden shadow-lg active:scale-95 transition cursor-pointer border border-slate-700">
                     <div class="relative z-10">
                         <h2 class="text-xl font-bold text-white mb-1"><i class="fas fa-play-circle mr-2 text-indigo-400"></i>Xem & Kiếm</h2>
@@ -71,6 +79,7 @@
                     </div>
                     <i class="fas fa-video absolute -bottom-4 -right-4 text-8xl text-white opacity-5"></i>
                 </div>
+
                 <div onclick="showPage('games-list-page')" class="bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl p-6 mb-6 relative overflow-hidden shadow-lg active:scale-95 transition cursor-pointer">
                     <div class="relative z-10">
                         <h2 class="text-2xl font-bold text-white mb-1"><i class="fas fa-gamepad mr-2"></i>Chơi Game</h2>
@@ -79,6 +88,7 @@
                     </div>
                     <i class="fas fa-ghost absolute -bottom-4 -right-4 text-8xl text-white opacity-10"></i>
                 </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
                         <p class="text-slate-400 text-xs">Tổng xu đã kiếm</p>
@@ -90,12 +100,14 @@
                     </div>
                 </div>
             </div>
+
             <div id="games-list-page" class="page-section hidden">
                 <button onclick="showPage('home-page')" class="mb-4 text-slate-400 text-sm flex items-center"><i class="fas fa-arrow-left mr-2"></i> Quay lại</button>
                 <div id="games-list" class="grid grid-cols-2 gap-4">
                     <div class="col-span-2 text-center py-10 text-slate-500">Đang tải game...</div>
                 </div>
             </div>
+
             <div id="wallet-page" class="page-section hidden">
                 <div class="bg-slate-800 rounded-2xl p-6 mb-6 text-center border border-slate-700">
                     <p class="text-slate-400 text-sm mb-1">Số xu hiện tại</p>
@@ -119,10 +131,12 @@
                     <p class="text-[10px] text-slate-500 text-center mt-3 italic">* Thời gian duyệt rút tiền từ 1 - 3 ngày làm việc.</p>
                 </div>
             </div>
+
             <div id="history-page" class="page-section hidden">
                 <h3 class="font-bold mb-4 text-white">Lịch sử thanh toán</h3>
                 <div id="tx-history" class="space-y-2"><p class="text-center text-slate-500 text-sm py-10">Chưa có giao dịch.</p></div>
             </div>
+
             <div id="refer-page" class="page-section hidden">
                 <div class="text-center mt-8 p-4">
                     <div class="mb-6">
@@ -147,6 +161,7 @@
                 </div>
             </div>
         </main>
+
         <nav class="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 flex justify-around p-2 pb-6 z-30">
             <button onclick="showPage('home-page')" class="nav-item active flex flex-col items-center text-slate-500 w-1/4" id="nav-home"><i class="fas fa-home text-xl mb-1"></i> <span class="text-[10px]">Trang chủ</span></button>
             <button onclick="showPage('refer-page')" class="nav-item flex flex-col items-center text-slate-500 w-1/4" id="nav-refer"><i class="fas fa-share-alt text-xl mb-1"></i> <span class="text-[10px]">Mời</span></button>
@@ -175,83 +190,110 @@
         const firebaseConfig = { apiKey: "AIzaSyA2CtHpu_lm_tgrRshFzq-jD-PNrXzUrhM", authDomain: "zirogame-e078c.firebaseapp.com", databaseURL: "https://zirogame-e078c-default-rtdb.firebaseio.com", projectId: "zirogame-e078c", storageBucket: "zirogame-e078c.firebasestorage.app", messagingSenderId: "932469574208", appId: "1:932469574208:web:4ddf6635c3795f424dada5" };
         const appId = "1:932469574208:web:4ddf6635c3795f424dada5";
         firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
         const db = firebase.firestore();
-        let currentUserData = null, gameTimerInterval = null, secondsPlayed = 0, adTimerInterval = null, adSecondsLeft = 0;
-        let SETTINGS = { gameDuration: 30, gameReward: 50, referBonus: 500, watchAdReward: 50, watchAdDelay: 15, coinValue: "10000 VNĐ", socials: {} };
-
-        window.Telegram.WebApp.ready();
-        const tg = window.Telegram.WebApp;
-        const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id.toString() : 'demo_user_' + Math.random().toString(36).substr(2, 9);
-
-        async function initApp() {
-            document.getElementById('auth-screen').classList.remove('hidden');
-            await loadSettings();
-            loadProfile(userId);
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('main-app').classList.remove('hidden');
-        }
-
+        let currentUser = null, userData = null, gameTimerInterval = null, secondsPlayed = 0, adTimerInterval = null, adSecondsLeft = 0;
+        let SETTINGS = { gameDuration: 30, gameReward: 50, referBonus: 500, watchAdReward: 50, watchAdDelay: 15, coinValue: "10000 VNĐ", socials: {}, paymentMethods: ['MOMO'], lastWithdrawTime: null };
+        async function initAuth() { try { await auth.signInAnonymously(); } catch(e) { fallbackMode(); } }
+        auth.onAuthStateChanged(async (u) => {
+            if (u) {
+                currentUser = u;
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                await loadSettings();
+                loadProfile(u.uid);
+            }
+        });
         async function loadSettings() {
             try {
                 const doc = await db.collection(`artifacts/${appId}/public/data/settings`).doc('global').get();
                 if(doc.exists) {
                     const d = doc.data();
                     if(d.gameDuration) SETTINGS.gameDuration=d.gameDuration;
+                    if(d.gameReward) SETTINGS.gameReward=d.gameReward;
                     if(d.referralBonus) SETTINGS.referBonus=d.referralBonus;
                     if(d.watchAdReward) SETTINGS.watchAdReward=d.watchAdReward;
                     if(d.watchAdDelay) SETTINGS.watchAdDelay=d.watchAdDelay;
+                    if(d.withdrawLimit) SETTINGS.withdrawLimit = d.withdrawLimit;
                     if(d.coinValue) SETTINGS.coinValue=d.coinValue;
                     if(d.socials) SETTINGS.socials=d.socials;
                 }
                 updateUI();
-            } catch(e) {}
+            } catch(e) { console.log("Settings error"); }
         }
-
         function updateUI() {
             document.getElementById('ad-reward-disp').innerText = SETTINGS.watchAdReward;
             document.getElementById('refer-bonus-disp').innerText = SETTINGS.referBonus;
             document.getElementById('val-disp').innerText = SETTINGS.coinValue;
+            const sc = document.getElementById('social-links-container');
+            sc.innerHTML = '';
+            if(SETTINGS.socials) {
+                sc.classList.remove('hidden');
+                const s = SETTINGS.socials;
+                if(s.telegram) sc.innerHTML += `<a href="${s.telegram}" target="_blank" class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white"><i class="fab fa-telegram"></i></a>`;
+                if(s.youtube) sc.innerHTML += `<a href="${s.youtube}" target="_blank" class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white"><i class="fab fa-youtube"></i></a>`;
+                if(s.instagram) sc.innerHTML += `<a href="${s.instagram}" target="_blank" class="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center text-white"><i class="fab fa-instagram"></i></a>`;
+            }
         }
-
         async function loadProfile(uid) {
             const ref = db.collection(`artifacts/${appId}/users/${uid}/profile`).doc('main');
-            const doc = await ref.get();
-            if(!doc.exists) {
-                const code = 'REF'+Math.floor(1000+Math.random()*9000);
-                await ref.set({uid, balance:0, referralCode:code, totalEarned:0, totalRefers:0, referredBy:null, lastWithdraw:null});
-                currentUserData={balance:0, referralCode:code};
-            } else currentUserData=doc.data();
-            updateHeader();
-            listenData(uid);
-            loadGames();
-            loadHistory(uid);
+            try {
+                const doc = await ref.get();
+                if(!doc.exists) {
+                    const code = 'REF'+Math.floor(1000+Math.random()*9000);
+                    await ref.set({uid, balance:0, referralCode:code, totalEarned:0, totalRefers:0, referredBy:null, lastWithdraw:null});
+                    userData={balance:0, referralCode:code};
+                } else userData=doc.data();
+                updateHeader();
+                listenData();
+                loadGames();
+                loadHistory();
+            } catch(e) { fallbackMode(); }
         }
-
-        function listenData(uid) {
-            db.collection(`artifacts/${appId}/users/${uid}/profile`).doc('main')
-            .onSnapshot(d=>{ if(d.exists) { currentUserData=d.data(); updateHeader(); }});
+        function listenData() {
+            db.collection(`artifacts/${appId}/users/${currentUser.uid}/profile`).doc('main')
+            .onSnapshot(d=>{ if(d.exists) { userData=d.data(); updateHeader(); }});
         }
-
         function updateHeader() {
-            if(!currentUserData) return;
-            document.getElementById('header-balance').innerText=currentUserData.balance;
-            document.getElementById('wallet-balance').innerText=currentUserData.balance;
-            document.getElementById('total-earned-display').innerText=currentUserData.totalEarned||0;
-            document.getElementById('total-refers-display').innerText=currentUserData.totalRefers||0;
-            document.getElementById('my-ref-code').innerText=currentUserData.referralCode||'...';
+            if(!userData) return;
+            document.getElementById('header-balance').innerText=userData.balance;
+            document.getElementById('wallet-balance').innerText=userData.balance;
+            document.getElementById('total-earned-display').innerText=userData.totalEarned||0;
+            document.getElementById('total-refers-display').innerText=userData.totalRefers||0;
+            document.getElementById('my-ref-code').innerText=userData.referralCode||'...';
         }
-
         function showPage(id) {
             document.querySelectorAll('.page-section').forEach(e=>e.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
+            document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+            if(id.includes('home')) document.getElementById('nav-home').classList.add('active');
+            if(id.includes('refer')) document.getElementById('nav-refer').classList.add('active');
+            if(id.includes('wallet')) document.getElementById('nav-wallet').classList.add('active');
+            if(id.includes('history')) document.getElementById('nav-history').classList.add('active');
         }
-
+        function startAdTimer(seconds) {
+            adSecondsLeft = seconds;
+            const timerDisplay = document.getElementById('ad-timer');
+            const timerText = document.getElementById('watch-timer-text');
+            if (adTimerInterval) clearInterval(adTimerInterval);
+            timerText.style.display = 'block';
+            timerDisplay.innerText = adSecondsLeft;
+            adTimerInterval = setInterval(() => {
+                adSecondsLeft--;
+                if (adSecondsLeft >= 0) {
+                    timerDisplay.innerText = adSecondsLeft;
+                } else {
+                    clearInterval(adTimerInterval);
+                    timerDisplay.innerText = "0";
+                }
+            }, 1000);
+        }
         function triggerWatchEarn() {
             showGigaAd(async () => {
                 await addCoins(SETTINGS.watchAdReward);
+                startAdTimer(SETTINGS.watchAdDelay);
             });
         }
-
         function showGigaAd(cb) {
             if (typeof show_11257322 === 'function') {
                 const overlay = document.getElementById('ad-overlay');
@@ -259,70 +301,143 @@
                 show_11257322().then(() => { 
                     overlay.classList.add('hidden');
                     if(cb) cb(); 
-                }).catch(() => { 
+                }).catch((err) => { 
                     overlay.classList.add('hidden');
+                    showToast("Không có quảng cáo, thử lại sau", "error"); 
                 });
-            }
+            } else { showToast("Đang kết nối quảng cáo...", "info"); }
         }
-
-        async function addCoins(amt) {
-            const ref = db.collection(`artifacts/${appId}/users/${userId}/profile`).doc('main');
-            await db.runTransaction(async t => {
-                const d = await t.get(ref);
-                const nb = (d.data().balance||0)+amt;
-                const nt = (d.data().totalEarned||0)+amt;
-                t.update(ref, {balance:nb, totalEarned:nt});
-            });
-            showToast(`+${amt} Xu!`, "success");
-        }
-
         function initiateGamePlay(url) {
             showGigaAd(() => {
-                document.getElementById('game-iframe').src = url;
+                document.getElementById('game-iframe').src = url || 'about:blank';
                 document.getElementById('play-overlay').classList.remove('hidden');
+                document.getElementById('top-claim-container').classList.add('hidden');
+                startGameTimer();
             });
         }
-
+        function startGameTimer() {
+            secondsPlayed = 0;
+            document.getElementById('game-timer').innerText = "00:00";
+            if(gameTimerInterval) clearInterval(gameTimerInterval);
+            gameTimerInterval = setInterval(() => {
+                secondsPlayed++;
+                const m = Math.floor(secondsPlayed / 60).toString().padStart(2, '0');
+                const s = (secondsPlayed % 60).toString().padStart(2, '0');
+                document.getElementById('game-timer').innerText = `${m}:${s}`;
+                if(secondsPlayed >= 30) {
+                    document.getElementById('top-claim-container').classList.remove('hidden');
+                    if(navigator.vibrate) navigator.vibrate(200);
+                }
+            }, 1000);
+        }
+        function triggerClaimReward() {
+            document.getElementById('top-claim-container').classList.add('hidden');
+            showGigaAd(async () => {
+                await addCoins(20);
+                secondsPlayed = 0;
+                document.getElementById('game-timer').innerText = "00:00";
+            });
+        }
         function exitGame() {
             document.getElementById('play-overlay').classList.add('hidden');
             document.getElementById('game-iframe').src = '';
+            clearInterval(gameTimerInterval);
         }
-
+        async function addCoins(amt) {
+            if(!currentUser) { userData.balance+=amt; updateHeader(); return; }
+            const ref = db.collection(`artifacts/${appId}/users/${currentUser.uid}/profile`).doc('main');
+            try {
+                await db.runTransaction(async t => {
+                    const d = await t.get(ref);
+                    const nb = (d.data().balance||0)+amt;
+                    const nt = (d.data().totalEarned||0)+amt;
+                    t.update(ref, {balance:nb, totalEarned:nt});
+                });
+                showToast(`+${amt} Xu!`, "success");
+            } catch(e) { userData.balance+=amt; updateHeader(); }
+        }
+        async function redeemReferral() {
+            const code = document.getElementById('input-ref-code').value.trim().toUpperCase();
+            if(!code || code===userData.referralCode || userData.referredBy) return showToast("Mã không hợp lệ", "error");
+            const ref = db.collection(`artifacts/${appId}/users/${currentUser.uid}/profile`).doc('main');
+            await ref.update({balance: firebase.firestore.FieldValue.increment(SETTINGS.referBonus), referredBy: code});
+            showToast(`Thành công! +${SETTINGS.referBonus} Xu`, "success");
+        }
         function loadGames() {
             db.collection(`artifacts/${appId}/public/data/games`).get().then(s=>{
                 const l = document.getElementById('games-list'); l.innerHTML = '';
+                if(s.empty) return fallbackMode();
                 s.forEach(d=>{
                     const g=d.data();
-                    l.innerHTML+=`<div class="bg-slate-800 rounded-xl overflow-hidden p-2 text-center"><h4 class="font-bold text-sm truncate">${g.title}</h4><button onclick="initiateGamePlay('${g.url}')" class="bg-indigo-600 w-full py-1 mt-2 rounded text-white text-xs">CHƠI</button></div>`;
+                    l.innerHTML+=`<div class="bg-slate-800 rounded-xl overflow-hidden shadow border border-slate-700 pb-2"><img src="${g.image}" class="w-full h-24 object-cover" onerror="this.src='https://placehold.co/400'"><div class="p-2 text-center"><h4 class="font-bold text-sm truncate mb-2">${g.title}</h4><button onclick="initiateGamePlay('${g.url}')" class="bg-indigo-600 w-full py-1 text-xs rounded text-white">CHƠI</button></div></div>`;
                 });
-            });
+            }).catch(fallbackMode);
         }
-
-        function loadHistory(uid) {
-            db.collection(`artifacts/${appId}/public/data/withdrawals`).where("userId", "==", uid).onSnapshot(s=>{
+        function loadHistory() {
+            db.collection(`artifacts/${appId}/public/data/withdrawals`).onSnapshot(s=>{
                 const c = document.getElementById('tx-history'); c.innerHTML='';
-                s.forEach(d=>{
-                    const x=d.data();
-                    c.innerHTML+=`<div class="bg-slate-800 p-3 rounded mb-2 flex justify-between"><span>${x.method}</span><span>-${x.amount}</span></div>`;
+                let t=[]; s.forEach(d=>{if(d.data().userId===currentUser.uid)t.push(d.data())});
+                if(t.length===0) return c.innerHTML='<p class="text-center text-slate-500 text-sm py-10">Chưa có giao dịch!</p>';
+                t.sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
+                t.forEach(x=>{
+                    let col=x.status==='paid'?'text-green-500':(x.status==='rejected'?'text-red-500':'text-yellow-500');
+                    c.innerHTML+=`<div class="bg-slate-800 p-3 rounded flex justify-between border border-slate-700 mb-2"><div><p class="text-sm font-bold uppercase">${x.method}</p><p class="text-xs text-slate-400">${x.details}</p></div><div class="text-right"><p class="font-bold">-${x.amount}</p><p class="text-[10px] uppercase font-bold ${col}">${x.status}</p></div></div>`;
                 });
             });
         }
-
         async function handleWithdraw(e) {
-            e.preventDefault();
-            const a = parseInt(document.getElementById('withdraw-amount').value);
-            const d = document.getElementById('withdraw-details').value;
-            if(a > currentUserData.balance) return showToast("Không đủ xu", "error");
-            await db.collection(`artifacts/${appId}/public/data/withdrawals`).add({ userId, amount: a, method: 'MOMO', details: d, status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-            showToast("Đã gửi yêu cầu!", "success");
+    e.preventDefault();
+    
+    if (userData.lastWithdraw) {
+        const lastTime = userData.lastWithdraw.toDate();
+        const now = new Date();
+        const diffHours = (now - lastTime) / (1000 * 60 * 60);
+        
+        if (diffHours < 24) {
+            const hoursLeft = Math.ceil(24 - diffHours);
+            return showToast(`Bạn đã rút tiền trong 24h qua. Vui lòng quay lại sau ${hoursLeft} giờ!`, "error");
         }
+    }
 
+    const btn = document.getElementById('withdraw-btn');
+    const m = "MOMO", d = document.getElementById('withdraw-details').value, a = parseInt(document.getElementById('withdraw-amount').value);
+    
+    if(a > userData.balance) return showToast("Số dư không đủ", "error");
+
+    btn.disabled = true;
+    try {
+        const uRef = db.collection(`artifacts/${appId}/users/${currentUser.uid}/profile`).doc('main');
+        
+        await uRef.update({
+            balance: firebase.firestore.FieldValue.increment(-a), 
+            lastWithdraw: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        await db.collection(`artifacts/${appId}/public/data/withdrawals`).add({
+            userId: currentUser.uid, 
+            amount: a, 
+            method: m, 
+            details: d, 
+            status: 'pending', 
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        showToast("Đã gửi yêu cầu rút tiền!", "success"); 
+        e.target.reset();
+    } catch(err) { 
+        showToast("Lỗi hệ thống, vui lòng thử lại sau.", "error"); 
+    }
+    btn.disabled = false;
+}
+        function fallbackMode() {
+            if(!userData) userData={balance:0, referralCode:'DEMO', totalEarned:0}; updateHeader();
+            document.getElementById('games-list').innerHTML='<p class="col-span-2 text-center text-slate-500">Chưa có game nào!</p>';
+        }
+        function copyRefCode() { navigator.clipboard.writeText(userData.referralCode); showToast("Đã sao chép","success"); }
         function showToast(m,t) {
-            const d=document.createElement('div'); d.className='toast show'; d.innerHTML=m;
+            const d=document.createElement('div'); d.className='toast show'; d.innerHTML=`<span class="${t==='success'?'text-green-400':'text-red-400'} mr-2">●</span> ${m}`;
             document.getElementById('toast-container').appendChild(d); setTimeout(()=>d.remove(),3000);
         }
-
-        initApp();
     </script>
 </body>
 </html>
