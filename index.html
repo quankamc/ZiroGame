@@ -387,37 +387,48 @@
         }
         async function handleWithdraw(e) {
     e.preventDefault();
-
+    
     if (userData.lastWithdraw) {
         const lastTime = userData.lastWithdraw.toDate();
         const now = new Date();
         const diffHours = (now - lastTime) / (1000 * 60 * 60);
-
-        if (diffHours < SETTINGS.withdrawLimit) {
-            const hoursLeft = Math.ceil(SETTINGS.withdrawLimit - diffHours);
-            return showToast(`Bạn chỉ được rút ${SETTINGS.withdrawLimit}h/lần. Quay lại sau ${hoursLeft}h!`, "error");
+        
+        if (diffHours < 24) {
+            const hoursLeft = Math.ceil(24 - diffHours);
+            return showToast(`Bạn đã rút tiền trong 24h qua. Vui lòng quay lại sau ${hoursLeft} giờ!`, "error");
         }
     }
 
     const btn = document.getElementById('withdraw-btn');
     const m = "MOMO", d = document.getElementById('withdraw-details').value, a = parseInt(document.getElementById('withdraw-amount').value);
-    if(a > userData.balance) return showToast("Số dư không đủ","error");
+    
+    if(a > userData.balance) return showToast("Số dư không đủ", "error");
 
     btn.disabled = true;
     try {
         const uRef = db.collection(`artifacts/${appId}/users/${currentUser.uid}/profile`).doc('main');
+        
         await uRef.update({
             balance: firebase.firestore.FieldValue.increment(-a), 
             lastWithdraw: firebase.firestore.FieldValue.serverTimestamp()
         });
+
         await db.collection(`artifacts/${appId}/public/data/withdrawals`).add({
-            userId: currentUser.uid, amount: a, method: m, details: d, 
-            status: 'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            userId: currentUser.uid, 
+            amount: a, 
+            method: m, 
+            details: d, 
+            status: 'pending', 
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
-        showToast("Đã gửi yêu cầu", "success"); e.target.reset();
-    } catch(e) { showToast("Thất bại", "error"); }
-    btn.disabled = false;
+
+        showToast("Đã gửi yêu cầu rút tiền!", "success"); 
+        e.target.reset();
+    } catch(err) { 
+        showToast("Lỗi hệ thống, vui lòng thử lại sau.", "error"); 
     }
+    btn.disabled = false;
+}
         function fallbackMode() {
             if(!userData) userData={balance:0, referralCode:'DEMO', totalEarned:0}; updateHeader();
             document.getElementById('games-list').innerHTML='<p class="col-span-2 text-center text-slate-500">Chưa có game nào!</p>';
