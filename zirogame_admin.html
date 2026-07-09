@@ -99,6 +99,10 @@
                                 <label class="text-[10px] uppercase text-slate-400 font-bold">Giá trị 10.000 xu</label>
                                 <input id="set-val" type="text" placeholder="10.000 VNĐ" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
                             </div>
+                            <div>
+                               <label class="text-[10px] uppercase text-slate-400 font-bold">Giới hạn rút tiền (giờ)</label>
+                               <input id="set-withdraw-limit" type="number" value="24" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
+                           </div>
                         </div>
                     </div>
 
@@ -208,6 +212,7 @@
                 referralBonus: parseInt(document.getElementById('set-refer').value)||500,
                 watchAdReward: parseInt(document.getElementById('set-ad-reward').value)||50,
                 watchAdDelay: parseInt(document.getElementById('set-ad-delay').value)||15,
+                withdrawLimit: parseInt(document.getElementById('set-withdraw-limit').value)||24,
                 coinValue: document.getElementById('set-val').value || "10.000 VNĐ",
                 paymentMethods: methods,
                 socials: {
@@ -229,6 +234,7 @@
                     document.getElementById('set-refer').value = data.referralBonus||500;
                     document.getElementById('set-ad-reward').value = data.watchAdReward||50;
                     document.getElementById('set-ad-delay').value = data.watchAdDelay||15;
+                    document.getElementById('set-withdraw-limit').value = data.withdrawLimit||24;
                     document.getElementById('set-val').value = data.coinValue||"10.000 VNĐ";
                     document.getElementById('set-methods').value = (data.paymentMethods||[]).join(', ');
                     if(data.socials) {
