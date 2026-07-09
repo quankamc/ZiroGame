@@ -6,259 +6,130 @@
     <title>ZiroGame - AdminPanel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore-compat.js"></script>
-
     <style>
         body { font-family: sans-serif; background-color: #0f172a; color: white; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 4px; }
-        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 3000; }
-        .toast { background: #1e293b; border-left: 4px solid #6366f1; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s; display: flex; align-items: center; min-width: 250px; }
-        .toast.show { opacity: 1; }
-        .tab-btn.active { background-color: #4f46e5; color: white; border-color: #4f46e5; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tab-btn.active { background-color: #4f46e5 !important; }
+        .toast { position: fixed; top: 20px; right: 20px; background: #1e293b; padding: 15px; border-radius: 8px; border-left: 4px solid #6366f1; z-index: 9999; display: none; }
     </style>
 </head>
-<body class="min-h-screen font-sans">
-
-    <div id="toast-container"></div>
+<body>
+    <div id="toast" class="toast"></div>
 
     <!-- Login -->
-    <div id="login-sec" class="flex flex-col items-center justify-center h-screen p-4">
-        <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-slate-700 w-full max-w-sm">
-            <h1 class="text-2xl font-bold mb-2 text-center text-white">ZiroGame AdminPanel</h1>
-            <p class="text-slate-400 text-center text-xs mb-6">Đăng nhập hệ thống</p>
-            <form onsubmit="handleLogin(event)" class="space-y-4">
-                <input type="email" id="adm-email" class="w-full bg-slate-900 p-3 rounded-lg border border-slate-600 outline-none text-white" placeholder="admin@gmail.com" required>
-                <input type="password" id="adm-pass" class="w-full bg-slate-900 p-3 rounded-lg border border-slate-600 outline-none text-white" placeholder="••••••••" required>
-                <button type="submit" id="login-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-lg font-bold mt-2">Đăng nhập</button>
-            </form>
+    <div id="login-sec" class="flex items-center justify-center h-screen p-4">
+        <div class="bg-slate-800 p-8 rounded-2xl w-full max-w-sm">
+            <h1 class="text-xl font-bold mb-6 text-center">ZiroGame Admin</h1>
+            <input id="adm-email" type="email" placeholder="Email" class="w-full bg-slate-900 p-3 mb-3 rounded border border-slate-700 outline-none">
+            <input id="adm-pass" type="password" placeholder="Password" class="w-full bg-slate-900 p-3 mb-6 rounded border border-slate-700 outline-none">
+            <button onclick="login()" class="w-full bg-indigo-600 py-3 rounded font-bold">Đăng nhập</button>
         </div>
     </div>
 
     <!-- Dashboard -->
-    <div id="dash-sec" class="hidden min-h-screen flex flex-col">
-        <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-20 shadow-lg">
-            <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
-                <div class="flex items-center gap-2">
-                    <span class="font-bold text-lg">ZiroGame AdminPanel</span>
-                </div>
-                <div class="flex bg-slate-900 rounded-lg p-1 gap-1 overflow-x-auto">
-                    <button onclick="showTab('games')" id="btn-games" class="tab-btn active px-4 py-1.5 rounded-md text-sm text-slate-400">Trò chơi</button>
-                    <button onclick="showTab('settings')" id="btn-settings" class="tab-btn px-4 py-1.5 rounded-md text-sm text-slate-400">Cài đặt</button>
-                    <button onclick="showTab('withdrawals')" id="btn-withdrawals" class="tab-btn px-4 py-1.5 rounded-md text-sm text-slate-400">Rút tiền</button>
-                </div>
-                <button onclick="logout()" class="bg-red-500/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-bold">Đăng xuất</button>
+    <div id="dash-sec" class="hidden min-h-screen">
+        <nav class="bg-slate-800 p-4 flex justify-between items-center border-b border-slate-700">
+            <span class="font-bold">Admin Panel</span>
+            <div class="flex gap-2">
+                <button onclick="switchTab('games')" id="btn-games" class="tab-btn bg-slate-700 px-4 py-1 rounded">Game</button>
+                <button onclick="switchTab('settings')" id="btn-settings" class="tab-btn bg-slate-700 px-4 py-1 rounded">Cài đặt</button>
+                <button onclick="switchTab('withdrawals')" id="btn-withdrawals" class="tab-btn bg-slate-700 px-4 py-1 rounded">Rút tiền</button>
             </div>
-        </header>
+            <button onclick="logout()" class="text-red-400">Đăng xuất</button>
+        </nav>
 
-        <main class="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">
-            
-            <!-- GAMES TAB -->
+        <main class="p-6 max-w-4xl mx-auto">
+            <!-- Game Tab -->
             <div id="tab-games" class="tab-content">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 h-fit">
-                        <h2 class="font-bold mb-4 text-green-400">Thêm trò chơi</h2>
-                        <div class="space-y-3">
-                            <input id="g-title" placeholder="Tên trò chơi" class="w-full bg-slate-900 p-3 rounded border border-slate-600 text-sm outline-none">
-                            <input id="g-img" placeholder="Link ảnh" class="w-full bg-slate-900 p-3 rounded border border-slate-600 text-sm outline-none">
-                            <input id="g-url" placeholder="Link trò chơi" class="w-full bg-slate-900 p-3 rounded border border-slate-600 text-sm outline-none">
-                            <button onclick="addGame()" class="w-full bg-green-600 hover:bg-green-700 py-2.5 rounded font-bold text-sm">Xuất bản</button>
-                        </div>
-                    </div>
-                    <div class="lg:col-span-2 bg-slate-800 p-5 rounded-xl border border-slate-700 h-[70vh] flex flex-col">
-                        <h2 class="font-bold mb-4 text-slate-300">Trò chơi đang chạy</h2>
-                        <div id="games-list" class="flex-1 overflow-y-auto space-y-2 pr-2">Đang tải...</div>
-                    </div>
-                </div>
+                <h2 class="text-lg font-bold mb-4">Danh sách trò chơi</h2>
+                <div id="games-list" class="space-y-2"></div>
             </div>
 
-            <!-- SETTINGS TAB -->
-            <div id="tab-settings" class="tab-content hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Game & Coin Config -->
-                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-                        <h2 class="font-bold mb-5 text-yellow-400 border-b border-slate-700 pb-2">Cấu hình Game & Xu</h2>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="text-[10px] uppercase text-slate-400 font-bold">Thời lượng (giây)</label>
-                                <input id="set-duration" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
-                            </div>
-                            <div>
-                                <label class="text-[10px] uppercase text-slate-400 font-bold">Thưởng mỗi ván (xu)</label>
-                                <input id="set-reward" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
-                            </div>
-                            <div>
-                                <label class="text-[10px] uppercase text-slate-400 font-bold">Thưởng giới thiệu (xu)</label>
-                                <input id="set-refer" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
-                            </div>
-                            <div>
-                                <label class="text-[10px] uppercase text-slate-400 font-bold">Giá trị 10.000 xu</label>
-                                <input id="set-val" type="text" placeholder="10.000 VNĐ" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Watch & Earn Config -->
-                    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
-                        <h2 class="font-bold mb-5 text-purple-400 border-b border-slate-700 pb-2">Cài đặt quảng cáo</h2>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="text-[10px] uppercase text-slate-400 font-bold">Thưởng xem quảng cáo</label>
-                                <input id="set-ad-reward" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
-                            </div>
-                            <div>
-                                <label class="text-[10px] uppercase text-slate-400 font-bold">Thời gian chờ (giây)</label>
-                                <input id="set-ad-delay" type="number" class="w-full bg-slate-900 p-2 rounded border border-slate-600 mt-1">
-                            </div>
-                        </div>
-                        
-                        <h2 class="font-bold mb-3 mt-6 text-blue-400 border-b border-slate-700 pb-2">Liên kết & Thanh toán</h2>
-                        <div class="space-y-3">
-                            <input id="set-methods" placeholder="Phương thức (Momo, Bank...)" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
-                            <input id="link-tg" placeholder="Link Telegram" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
-                            <input id="link-yt" placeholder="Link YouTube" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
-                            <input id="link-ig" placeholder="Link Instagram" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
-                        </div>
-
-                        <button onclick="saveSettings()" class="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded font-bold mt-6">Lưu lại</button>
-                    </div>
-                </div>
+            <!-- Settings Tab -->
+            <div id="tab-settings" class="tab-content">
+                <h2 class="text-lg font-bold mb-4">Cấu hình hệ thống</h2>
+                <button onclick="saveSettings()" class="bg-indigo-600 px-6 py-2 rounded font-bold">Lưu thay đổi</button>
             </div>
 
-            <!-- WITHDRAWALS TAB -->
-            <div id="tab-withdrawals" class="tab-content hidden">
-                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 h-[80vh] flex flex-col">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="font-bold text-red-400">Yêu cầu rút tiền</h2>
-                        <button onclick="loadWithdrawals()" class="text-xs bg-slate-700 px-3 py-1 rounded">Làm mới</button>
-                    </div>
-                    <div id="wd-list" class="flex-1 overflow-y-auto space-y-3 pr-2"></div>
-                </div>
+            <!-- Withdrawals Tab -->
+            <div id="tab-withdrawals" class="tab-content">
+                <h2 class="text-lg font-bold mb-4">Yêu cầu rút tiền</h2>
+                <div id="wd-list" class="space-y-3"></div>
             </div>
         </main>
     </div>
 
     <script>
-        // DÁN ĐOẠN CẤU HÌNH CỦA BẠN VÀO ĐÂY:
         const firebaseConfig = { apiKey: "AIzaSyA2CtHpu_lm_tgrRshFzq-jD-PNrXzUrhM", authDomain: "zirogame-e078c.firebaseapp.com", databaseURL: "https://zirogame-e078c-default-rtdb.firebaseio.com", projectId: "zirogame-e078c", storageBucket: "zirogame-e078c.firebasestorage.app", messagingSenderId: "932469574208", appId: "1:932469574208:web:4ddf6635c3795f424dada5" };
-        const appId = "1:932469574208:web:4ddf6635c3795f424dada5";
-        
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        const appId = "1:932469574208:web:4ddf6635c3795f424dada5";
 
-        auth.onAuthStateChanged(user => { if(user) verifyAdmin(user); else showLogin(); });
-
-        async function handleLogin(e) {
-            e.preventDefault();
-            document.getElementById('login-btn').innerText = 'Đang xác thực...';
-            try { await auth.signInWithEmailAndPassword(document.getElementById('adm-email').value, document.getElementById('adm-pass').value); }
-            catch(e) { showToast(e.message, 'error'); document.getElementById('login-btn').innerText='Đăng nhập'; }
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
         }
 
-        async function verifyAdmin(user) {
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById('btn-' + tab).classList.add('active');
+        }
+
+        async function login() {
             try {
-                const doc = await db.collection(`artifacts/${appId}/admins`).doc(user.uid).get();
-                if(doc.exists && doc.data().role === 'admins') { showDashboard(); initData(); showToast("Đăng nhập thành công!", "success"); }
-                else throw new Error("Truy cập bị từ chối");
-            } catch(e) { auth.signOut(); showToast(e.message, "error"); }
+                await auth.signInWithEmailAndPassword(document.getElementById('adm-email').value, document.getElementById('adm-pass').value);
+                location.reload();
+            } catch(e) { showToast("Lỗi: " + e.message); }
         }
 
-        function showLogin() { document.getElementById('login-sec').classList.remove('hidden'); document.getElementById('dash-sec').classList.add('hidden'); }
-        function showDashboard() { document.getElementById('login-sec').classList.add('hidden'); document.getElementById('dash-sec').classList.remove('hidden'); }
-        function logout() { auth.signOut(); location.reload(); }
-        
-        function showTab(t) { 
-            document.querySelectorAll('.tab-content').forEach(e=>e.classList.add('hidden')); 
-            document.getElementById('tab-'+t).classList.remove('hidden');
-            document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active','text-white'));
-            document.getElementById('btn-'+t).classList.add('active','text-white');
-        }
-
-        function initData() { loadGames(); loadSettings(); loadWithdrawals(); }
-
-        function addGame() {
-            const t=document.getElementById('g-title').value, i=document.getElementById('g-img').value, u=document.getElementById('g-url').value;
-            if(!t||!u) return showToast("Thiếu tiêu đề hoặc URL", "error");
-            db.collection(`artifacts/${appId}/public/data/games`).add({title:t, image:i, url:u, createdAt: firebase.firestore.FieldValue.serverTimestamp()})
-            .then(()=>{showToast("Đã thêm thành công","success"); document.getElementById('g-title').value='';});
-        }
-
-        function loadGames() {
-            db.collection(`artifacts/${appId}/public/data/games`).onSnapshot(s => {
-                const l = document.getElementById('games-list'); l.innerHTML = '';
-                let g = []; s.forEach(d=>g.push({id:d.id, ...d.data()}));
-                g.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-                g.forEach(gm => {
-                    l.innerHTML += `<div class="flex items-center gap-3 bg-slate-900 p-3 rounded border border-slate-700"><img src="${gm.image}" class="w-10 h-10 rounded"><div class="flex-1"><p class="text-sm font-bold">${gm.title}</p></div><button onclick="delGame('${gm.id}')" class="text-red-400"><i class="fas fa-trash"></i></button></div>`;
-                });
-            });
-        }
-        function delGame(id) { if(confirm("Xóa trò chơi này?")) db.collection(`artifacts/${appId}/public/data/games`).doc(id).delete(); }
-
-        function saveSettings() {
-            const methods = document.getElementById('set-methods').value.split(',').map(s=>s.trim()).filter(s=>s);
-            const data = {
-                gameDuration: parseInt(document.getElementById('set-duration').value)||60,
-                gameReward: parseInt(document.getElementById('set-reward').value)||50,
-                referralBonus: parseInt(document.getElementById('set-refer').value)||500,
-                watchAdReward: parseInt(document.getElementById('set-ad-reward').value)||50,
-                watchAdDelay: parseInt(document.getElementById('set-ad-delay').value)||15,
-                coinValue: document.getElementById('set-val').value || "10.000 VNĐ",
-                paymentMethods: methods,
-                socials: {
-                    telegram: document.getElementById('link-tg').value,
-                    youtube: document.getElementById('link-yt').value,
-                    instagram: document.getElementById('link-ig').value
-                }
-            };
-            db.collection(`artifacts/${appId}/public/data/settings`).doc('global').set(data, {merge:true})
-            .then(()=>showToast("Đã lưu cài đặt!","success"));
-        }
-
-        function loadSettings() {
-            db.collection(`artifacts/${appId}/public/data/settings`).doc('global').get().then(d => {
-                if(d.exists) {
-                    const data = d.data();
-                    document.getElementById('set-duration').value = data.gameDuration||60;
-                    document.getElementById('set-reward').value = data.gameReward||50;
-                    document.getElementById('set-refer').value = data.referralBonus||500;
-                    document.getElementById('set-ad-reward').value = data.watchAdReward||50;
-                    document.getElementById('set-ad-delay').value = data.watchAdDelay||15;
-                    document.getElementById('set-val').value = data.coinValue||"10.000 VNĐ";
-                    document.getElementById('set-methods').value = (data.paymentMethods||[]).join(', ');
-                    if(data.socials) {
-                        document.getElementById('link-tg').value = data.socials.telegram||'';
-                        document.getElementById('link-yt').value = data.socials.youtube||'';
-                        document.getElementById('link-ig').value = data.socials.instagram||'';
-                    }
-                }
-            });
-        }
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('login-sec').classList.add('hidden');
+                document.getElementById('dash-sec').classList.remove('hidden');
+                switchTab('withdrawals');
+                loadWithdrawals();
+            }
+        });
 
         function loadWithdrawals() {
-            db.collection(`artifacts/${appId}/public/data/withdrawals`).onSnapshot(s => {
-                const l = document.getElementById('wd-list'); l.innerHTML = '';
-                let r = []; s.forEach(d=>{ if(d.data().status==='pending') r.push({id:d.id, ...d.data()}) });
-                if(r.length===0) return l.innerHTML='<p class="text-center text-slate-500 mt-10">Không có yêu cầu nào</p>';
-                r.sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
-                r.forEach(req => {
-                    l.innerHTML += `<div class="bg-slate-700/40 p-4 rounded border border-slate-600"><div class="flex justify-between"><b>${req.amount} xu</b> <span class="uppercase text-xs bg-slate-600 px-2 py-1 rounded">${req.method}</span></div><div class="text-sm text-green-400 mt-1 font-mono">${req.details}</div><div class="flex gap-2 mt-2"><button onclick="upd('${req.id}','paid')" class="flex-1 bg-green-600 py-1 rounded text-sm">Thanh toán</button><button onclick="upd('${req.id}','rejected')" class="flex-1 bg-red-600 py-1 rounded text-sm">Từ chối</button></div></div>`;
+            db.collection(`artifacts/${appId}/public/data/withdrawals`)
+              .where("status", "==", "pending")
+              .onSnapshot(s => {
+                const list = document.getElementById('wd-list'); list.innerHTML = '';
+                s.forEach(doc => {
+                    const d = doc.data();
+                    list.innerHTML += `
+                        <div class="bg-slate-800 p-4 rounded border border-slate-700 flex justify-between items-center">
+                            <div>
+                                <p class="font-bold">${d.amount} Xu - ${d.method}</p>
+                                <p class="text-green-400 font-mono text-sm">${d.details}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="upd('${doc.id}', 'paid')" class="bg-green-600 px-3 py-1 rounded text-sm">Duyệt</button>
+                                <button onclick="upd('${doc.id}', 'rejected')" class="bg-red-600 px-3 py-1 rounded text-sm">Từ chối</button>
+                            </div>
+                        </div>`;
                 });
             });
         }
-        function upd(id, st) { db.collection(`artifacts/${appId}/public/data/withdrawals`).doc(id).update({status:st}).then(()=>showToast("Thành công", "success")); }
 
-        function showToast(m,t='info') {
-            const d=document.createElement('div'); d.className='toast'; 
-            d.innerHTML=`<i class="fas ${t==='success'?'fa-check':'fa-info-circle'} mr-2"></i> ${m}`;
-            document.getElementById('toast-container').appendChild(d);
-            setTimeout(()=>d.classList.add('show'),10); setTimeout(()=>{d.classList.remove('show');setTimeout(()=>d.remove(),300)},3000);
+        function upd(id, st) {
+            db.collection(`artifacts/${appId}/public/data/withdrawals`).doc(id).update({
+                status: st,
+                adminProcessed: auth.currentUser.email,
+                processedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => showToast("Đã xử lý!"));
         }
+
+        function logout() { auth.signOut().then(() => location.reload()); }
     </script>
 </body>
 </html>
