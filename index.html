@@ -375,7 +375,7 @@
             db.collection(`artifacts/${appId}/public/data/withdrawals`).onSnapshot(s=>{
                 const c = document.getElementById('tx-history'); c.innerHTML='';
                 let t=[]; s.forEach(d=>{if(d.data().userId===currentUser.uid)t.push(d.data())});
-                if(t.length===0) return c.innerHTML='<p class="text-center text-slate-500 text-sm py-10">Chưa có giao dịch.</p>';
+                if(t.length===0) return c.innerHTML='<p class="text-center text-slate-500 text-sm py-10">Chưa có giao dịch!</p>';
                 t.sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
                 t.forEach(x=>{
                     let col=x.status==='paid'?'text-green-500':(x.status==='rejected'?'text-red-500':'text-yellow-500');
