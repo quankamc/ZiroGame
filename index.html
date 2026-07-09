@@ -131,22 +131,24 @@
             </div>
 
             <div id="refer-page" class="page-section hidden">
-                <div class="text-center mt-10">
-                    <i class="fas fa-users text-6xl text-indigo-500 mb-4"></i>
-                    <h2 class="text-2xl font-bold text-white mb-2">Mời bạn bè</h2>
-                    <p class="text-slate-400 mb-6 px-4">Nhận <span class="text-yellow-400" id="refer-bonus-disp">500</span> Xu mỗi lượt.</p>
-                    <div class="bg-slate-800 p-4 rounded-xl mx-4 border border-dashed border-slate-600 mb-6">
-                        <p class="text-xs text-slate-400 mb-2">MÃ CỦA BẠN</p>
-                        <div class="flex justify-between items-center bg-slate-900 rounded-lg p-3">
-                            <span id="my-ref-code" class="font-mono text-lg font-bold text-white tracking-wider">...</span>
-                            <button onclick="copyRefCode()" class="text-indigo-400 hover:text-white"><i class="fas fa-copy"></i></button>
+                <div class="text-center mt-8 p-4">
+                    <div class="mb-6">
+                        <div class="text-indigo-400 text-5xl mb-3"><i class="fas fa-users"></i></div>
+                        <h2 class="text-2xl font-bold text-white mb-1">Mời bạn bè</h2>
+                        <p class="text-slate-400 text-sm">Nhận <span class="text-yellow-400 font-bold" id="refer-bonus-disp">500</span> Xu mỗi lượt.</p>
+                    </div>
+                    <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 mb-6">
+                        <p class="text-[10px] text-slate-500 uppercase tracking-widest mb-2 font-bold">Mã giới thiệu của bạn</p>
+                        <div class="flex justify-center items-center gap-3">
+                            <span id="my-ref-code" class="font-mono text-2xl font-bold text-white tracking-wider">...</span>
+                            <button onclick="copyRefCode()" class="bg-indigo-600/20 text-indigo-400 w-10 h-10 rounded-lg hover:bg-indigo-600 hover:text-white transition"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
-                    <div class="bg-slate-800 p-4 rounded-xl mx-4 border border-slate-700">
-                        <p class="text-xs text-slate-400 mb-2 text-left">BẠN CÓ MÃ GIỚI THIỆU?</p>
+                    <div class="text-left mb-4">
+                        <p class="text-xs text-slate-500 mb-2 font-bold uppercase">Nhập mã người giới thiệu</p>
                         <div class="flex gap-2">
-                            <input type="text" id="input-ref-code" placeholder="Nhập mã" class="bg-slate-900 flex-1 rounded-lg p-3 text-white border border-slate-600 outline-none uppercase">
-                            <button onclick="redeemReferral()" class="bg-green-600 text-white px-4 rounded-lg font-bold">Áp dụng</button>
+                            <input type="text" id="input-ref-code" placeholder="Nhập mã..." class="bg-slate-800 border border-slate-700 w-full rounded-xl p-4 text-white placeholder-slate-600 outline-none focus:border-indigo-500 transition uppercase">
+                            <button onclick="redeemReferral()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 rounded-xl transition shadow-lg shadow-indigo-600/20">Áp dụng</button>
                         </div>
                     </div>
                 </div>
@@ -373,7 +375,7 @@
             db.collection(`artifacts/${appId}/public/data/withdrawals`).onSnapshot(s=>{
                 const c = document.getElementById('tx-history'); c.innerHTML='';
                 let t=[]; s.forEach(d=>{if(d.data().userId===currentUser.uid)t.push(d.data())});
-                if(t.length===0) return c.innerHTML='<p class="text-center text-slate-500 py-10">Trống</p>';
+                if(t.length===0) return c.innerHTML='<p class="text-center text-slate-500 text-sm py-10">Chưa có giao dịch.</p>';
                 t.sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
                 t.forEach(x=>{
                     let col=x.status==='paid'?'text-green-500':(x.status==='rejected'?'text-red-500':'text-yellow-500');
