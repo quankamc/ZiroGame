@@ -188,7 +188,7 @@
         const db = firebase.firestore();
         let currentUser = null, userData = null, gameTimerInterval = null, secondsPlayed = 0;
         let lastAdWatchTime = 0;
-        let SETTINGS = { gameDuration: 60, gameReward: 50, referBonus: 500, watchAdReward: 50, watchAdDelay: 15, coinValue: "10000 VNĐ", socials: {}, paymentMethods: ['MOMO','STK'] };
+        let SETTINGS = { gameDuration: 60, gameReward: 50, referBonus: 500, watchAdReward: 50, watchAdDelay: 15, coinValue: "10000 VNĐ", socials: {}, paymentMethods: ['MOMO','Bank'] };
         async function initAuth() { try { await auth.signInAnonymously(); } catch(e) { fallbackMode(); } }
         auth.onAuthStateChanged(async (u) => {
             if (u) {
