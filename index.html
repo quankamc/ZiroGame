@@ -32,11 +32,19 @@
 
     <div id="toast-container"></div>
 
+    <div id="ad-overlay" class="hidden fixed inset-0 z-50 bg-slate-900/90 flex flex-col items-center justify-center">
+        <div class="bg-slate-800 p-8 rounded-2xl border border-slate-700 text-center w-4/5">
+            <h2 class="text-xl font-bold mb-4">Đang tải quảng cáo...</h2>
+            <div class="w-24 h-16 bg-slate-700 mx-auto rounded flex items-center justify-center mb-4">
+                <span class="text-slate-500 font-bold">Ad</span>
+            </div>
+            <p class="text-sm text-slate-400">Vui lòng đợi...</p>
+        </div>
+    </div>
+
     <div id="auth-screen" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center p-6">
         <div class="w-24 h-24 bg-indigo-600 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-indigo-500/50">
-            <a href="#"><img src="logogame.png" alt="Logo Game">
-</a>
-
+            <a href="#"><img src="logogame.png" alt="Logo Game"></a>
         </div>
         <h1 class="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">ZiroGame</h1>
         <p class="text-slate-400 mb-8 text-center">Chơi game, Xem video và Kiếm tiền thật!</p>
@@ -69,7 +77,6 @@
                         <div class="mt-4 inline-block bg-white/20 px-4 py-1 rounded-full text-xs font-bold backdrop-blur-sm">
                             NHẬN <span id="ad-reward-disp">10</span> XU
                         </div>
-                        <p id="ad-timer-msg" class="text-xs text-yellow-300 mt-2 hidden">Xem tiếp sau: <span id="ad-cooldown-timer">0</span>s</p>
                     </div>
                     <i class="fas fa-video absolute -bottom-4 -right-4 text-8xl text-white opacity-10"></i>
                 </div>
@@ -171,15 +178,6 @@
         </div>
     </div>
 
-    <div id="ad-modal" class="hidden fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-4">
-        <div class="absolute top-4 right-4 text-xs font-bold bg-white text-black px-2 py-1 rounded" id="ad-timer">5s</div>
-        <div class="w-full max-w-sm bg-slate-800 p-6 rounded-lg text-center border border-indigo-500">
-            <h2 class="text-xl font-bold text-white mb-2">Đang tải quảng cáo...</h2>
-            <div class="h-40 bg-slate-700 rounded mb-4 flex items-center justify-center animate-pulse"><i class="fas fa-ad text-4xl text-slate-500"></i></div>
-            <p class="text-xs text-slate-400 mb-4">Vui lòng đợi...</p>
-        </div>
-    </div>
-
     <script>
         const firebaseConfig = { apiKey: "AIzaSyA2CtHpu_lm_tgrRshFzq-jD-PNrXzUrhM", authDomain: "zirogame-e078c.firebaseapp.com", databaseURL: "https://zirogame-e078c-default-rtdb.firebaseio.com", projectId: "zirogame-e078c", storageBucket: "zirogame-e078c.firebasestorage.app", messagingSenderId: "932469574208", appId: "1:932469574208:web:4ddf6635c3795f424dada5" };
         const appId = "1:932469574208:web:4ddf6635c3795f424dada5";
@@ -187,7 +185,6 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
         let currentUser = null, userData = null, gameTimerInterval = null, secondsPlayed = 0;
-        let lastAdWatchTime = 0;
         let SETTINGS = { gameDuration: 60, gameReward: 50, referBonus: 500, watchAdReward: 50, watchAdDelay: 15, coinValue: "10000 VNĐ", socials: {}, paymentMethods: ['MOMO','Bank'] };
         async function initAuth() { try { await auth.signInAnonymously(); } catch(e) { fallbackMode(); } }
         auth.onAuthStateChanged(async (u) => {
@@ -273,48 +270,22 @@
             if(id.includes('history')) document.getElementById('nav-history').classList.add('active');
         }
         function triggerWatchEarn() {
-            const now = Date.now();
-            const elapsed = (now - lastAdWatchTime) / 1000;
-            const cooldown = SETTINGS.watchAdDelay;
-            if (elapsed < cooldown) {
-                const left = Math.ceil(cooldown - elapsed);
-                showToast(`Đợi ${left}s trước lần tiếp theo`, "error");
-                return;
-            }
             showGigaAd(async () => {
                 await addCoins(SETTINGS.watchAdReward);
-                lastAdWatchTime = Date.now();
-                startCooldownTimer(cooldown);
             });
         }
-        function startCooldownTimer(seconds) {
-            const card = document.getElementById('watch-earn-card');
-            const msg = document.getElementById('ad-timer-msg');
-            const disp = document.getElementById('ad-cooldown-timer');
-            card.classList.add('disabled-card');
-            msg.classList.remove('hidden');
-            let left = seconds;
-            disp.innerText = left;
-            const interval = setInterval(() => {
-                left--;
-                disp.innerText = left;
-                if(left <= 0) {
-                    clearInterval(interval);
-                    card.classList.remove('disabled-card');
-                    msg.classList.add('hidden');
-                }
-            }, 1000);
-        }
         function showGigaAd(cb) {
-            if(window.showGiga) {
-                showToast("Đang tải quảng cáo...", "info");
-                window.showGiga().then(()=>cb()).catch(()=>{ showToast("Lỗi, đang giả lập...", "error"); simulateAd(cb); });
-            } else { simulateAd(cb); }
-        }
-        function simulateAd(cb) {
-            const m = document.getElementById('ad-modal'); m.classList.remove('hidden');
-            let t=3; document.getElementById('ad-timer').innerText=t+'s';
-            const i = setInterval(()=>{ t--; document.getElementById('ad-timer').innerText=t+'s'; if(t<=0){clearInterval(i); m.classList.add('hidden'); cb();} },1000);
+            if (typeof show_11257322 === 'function') {
+                const overlay = document.getElementById('ad-overlay');
+                overlay.classList.remove('hidden');
+                show_11257322().then(() => { 
+                    overlay.classList.add('hidden');
+                    if(cb) cb(); 
+                }).catch((err) => { 
+                    overlay.classList.add('hidden');
+                    showToast("Không có quảng cáo, thử lại sau", "error"); 
+                });
+            } else { showToast("Đang kết nối quảng cáo...", "info"); }
         }
         function initiateGamePlay(url) {
             showGigaAd(() => {
