@@ -117,11 +117,18 @@
                 <div class="bg-slate-800 rounded-xl p-4">
                     <h3 class="font-bold mb-4 text-indigo-400">Rút tiền</h3>
                     <form onsubmit="handleWithdraw(event)" class="space-y-3">
-                        <select id="withdraw-method" class="w-full bg-slate-700 border-none rounded-lg p-3 text-white"></select>
+                        <div class="bg-slate-700 p-3 rounded-lg flex items-center border border-pink-500">
+                            <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" class="w-10 h-10 rounded-lg mr-3">
+                            <div>
+                                <p class="font-bold text-white">Ví MoMo</p>
+                                <p class="text-[10px] text-slate-300">Nhập số điện thoại đăng ký MoMo</p>
+                            </div>
+                        </div>
                         <input type="text" id="withdraw-details" required placeholder="Nhập SĐT MOMO" class="w-full bg-slate-700 border-none rounded-lg p-3 text-white">
                         <input type="number" id="withdraw-amount" required min="10000" placeholder="Số lượng (Xu)" class="w-full bg-slate-700 border-none rounded-lg p-3 text-white">
-                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">Gửi yêu cầu</button>
+                        <button type="submit" id="withdraw-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">Gửi yêu cầu</button>
                     </form>
+                    <p class="text-[10px] text-slate-500 text-center mt-3 italic">* Thời gian duyệt rút tiền từ 1 - 3 ngày làm việc.</p>
                 </div>
             </div>
 
@@ -186,7 +193,7 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
         let currentUser = null, userData = null, gameTimerInterval = null, secondsPlayed = 0, adTimerInterval = null, adSecondsLeft = 0;
-        let SETTINGS = { gameDuration: 30, gameReward: 50, referBonus: 500, watchAdReward: 50, watchAdDelay: 15, coinValue: "10000 VNĐ", socials: {}, paymentMethods: ['MOMO','Bank'] };
+        let SETTINGS = { gameDuration: 30, gameReward: 50, referBonus: 500, watchAdReward: 50, watchAdDelay: 15, coinValue: "10000 VNĐ", socials: {}, paymentMethods: ['MOMO'], lastWithdrawTime: null };
         async function initAuth() { try { await auth.signInAnonymously(); } catch(e) { fallbackMode(); } }
         auth.onAuthStateChanged(async (u) => {
             if (u) {
@@ -209,7 +216,6 @@
                     if(d.watchAdDelay) SETTINGS.watchAdDelay=d.watchAdDelay;
                     if(d.coinValue) SETTINGS.coinValue=d.coinValue;
                     if(d.socials) SETTINGS.socials=d.socials;
-                    if(d.paymentMethods) SETTINGS.paymentMethods=d.paymentMethods;
                 }
                 updateUI();
             } catch(e) { console.log("Settings error"); }
@@ -227,11 +233,6 @@
                 if(s.youtube) sc.innerHTML += `<a href="${s.youtube}" target="_blank" class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white"><i class="fab fa-youtube"></i></a>`;
                 if(s.instagram) sc.innerHTML += `<a href="${s.instagram}" target="_blank" class="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center text-white"><i class="fab fa-instagram"></i></a>`;
             }
-            const ps = document.getElementById('withdraw-method');
-            ps.innerHTML = '';
-            SETTINGS.paymentMethods.forEach(m => {
-                const o = document.createElement('option'); o.value=m; o.innerText=m; ps.appendChild(o);
-            });
         }
         async function loadProfile(uid) {
             const ref = db.collection(`artifacts/${appId}/users/${uid}/profile`).doc('main');
@@ -239,7 +240,7 @@
                 const doc = await ref.get();
                 if(!doc.exists) {
                     const code = 'REF'+Math.floor(1000+Math.random()*9000);
-                    await ref.set({uid, balance:0, referralCode:code, totalEarned:0, totalRefers:0, referredBy:null});
+                    await ref.set({uid, balance:0, referralCode:code, totalEarned:0, totalRefers:0, referredBy:null, lastWithdraw:null});
                     userData={balance:0, referralCode:code};
                 } else userData=doc.data();
                 updateHeader();
@@ -385,14 +386,17 @@
         }
         async function handleWithdraw(e) {
             e.preventDefault();
-            const m=document.getElementById('withdraw-method').value, d=document.getElementById('withdraw-details').value, a=parseInt(document.getElementById('withdraw-amount').value);
-            if(a>userData.balance) return showToast("Số dư không đủ","error");
+            const btn = document.getElementById('withdraw-btn');
+            const m = "MOMO", d = document.getElementById('withdraw-details').value, a = parseInt(document.getElementById('withdraw-amount').value);
+            if(a > userData.balance) return showToast("Số dư không đủ","error");
+            btn.disabled = true;
             try {
                 const uRef = db.collection(`artifacts/${appId}/users/${currentUser.uid}/profile`).doc('main');
-                await uRef.update({balance: firebase.firestore.FieldValue.increment(-a)});
+                await uRef.update({balance: firebase.firestore.FieldValue.increment(-a), lastWithdraw: firebase.firestore.FieldValue.serverTimestamp()});
                 await db.collection(`artifacts/${appId}/public/data/withdrawals`).add({userId:currentUser.uid, amount:a, method:m, details:d, status:'pending', timestamp: firebase.firestore.FieldValue.serverTimestamp()});
                 showToast("Đã gửi yêu cầu", "success"); e.target.reset();
             } catch(e) { showToast("Thất bại", "error"); }
+            btn.disabled = false;
         }
         function fallbackMode() {
             if(!userData) userData={balance:0, referralCode:'DEMO', totalEarned:0}; updateHeader();
