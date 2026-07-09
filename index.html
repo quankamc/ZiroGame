@@ -238,7 +238,7 @@
             try {
                 const doc = await ref.get();
                 if(!doc.exists) {
-                    const code = 'REF'+Math.floor(1000+Math.random()*9000);
+                    const code = 'ZIRO'+Math.floor(1000+Math.random()*9000);
                     await ref.set({uid, balance:0, referralCode:code, totalEarned:0, totalRefers:0, referredBy:null});
                     userData={balance:0, referralCode:code};
                 } else userData=doc.data();
