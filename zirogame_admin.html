@@ -26,7 +26,6 @@
 
     <div id="toast-container"></div>
 
-    <!-- Login -->
     <div id="login-sec" class="flex flex-col items-center justify-center h-screen p-4">
         <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-slate-700 w-full max-w-sm">
             <h1 class="text-2xl font-bold mb-2 text-center text-white">ZiroGame AdminPanel</h1>
@@ -39,7 +38,6 @@
         </div>
     </div>
 
-    <!-- Dashboard -->
     <div id="dash-sec" class="hidden min-h-screen flex flex-col">
         <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-20 shadow-lg">
             <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
@@ -50,6 +48,7 @@
                     <button onclick="showTab('games')" id="btn-games" class="tab-btn active px-4 py-1.5 rounded-md text-sm text-slate-400">Trò chơi</button>
                     <button onclick="showTab('settings')" id="btn-settings" class="tab-btn px-4 py-1.5 rounded-md text-sm text-slate-400">Cài đặt</button>
                     <button onclick="showTab('withdrawals')" id="btn-withdrawals" class="tab-btn px-4 py-1.5 rounded-md text-sm text-slate-400">Rút tiền</button>
+                    <button onclick="showTab('users')" id="btn-users" class="tab-btn px-4 py-1.5 rounded-md text-sm text-slate-400">Người dùng</button>
                 </div>
                 <button onclick="logout()" class="bg-red-500/10 text-red-400 px-3 py-1.5 rounded-lg text-xs font-bold">Đăng xuất</button>
             </div>
@@ -57,7 +56,6 @@
 
         <main class="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">
             
-            <!-- GAMES TAB -->
             <div id="tab-games" class="tab-content">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 h-fit">
@@ -76,10 +74,8 @@
                 </div>
             </div>
 
-            <!-- SETTINGS TAB -->
             <div id="tab-settings" class="tab-content hidden">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Game & Coin Config -->
                     <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
                         <h2 class="font-bold mb-5 text-yellow-400 border-b border-slate-700 pb-2">Cấu hình Game & Xu</h2>
                         <div class="space-y-4">
@@ -106,7 +102,6 @@
                         </div>
                     </div>
 
-                    <!-- Watch & Earn Config -->
                     <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
                         <h2 class="font-bold mb-5 text-purple-400 border-b border-slate-700 pb-2">Cài đặt quảng cáo</h2>
                         <div class="space-y-4">
@@ -127,13 +122,11 @@
                             <input id="link-yt" placeholder="Link YouTube" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
                             <input id="link-ig" placeholder="Link Instagram" class="w-full bg-slate-900 p-2 rounded border border-slate-600">
                         </div>
-
                         <button onclick="saveSettings()" class="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded font-bold mt-6">Lưu lại</button>
                     </div>
                 </div>
             </div>
 
-            <!-- WITHDRAWALS TAB -->
             <div id="tab-withdrawals" class="tab-content hidden">
                 <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 h-[80vh] flex flex-col">
                     <div class="flex justify-between items-center mb-4">
@@ -143,11 +136,24 @@
                     <div id="wd-list" class="flex-1 overflow-y-auto space-y-3 pr-2"></div>
                 </div>
             </div>
+
+            <div id="tab-users" class="tab-content hidden">
+                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 h-[80vh] flex flex-col">
+                    <h2 class="font-bold mb-4 text-blue-400">Danh sách người dùng</h2>
+                    <div class="overflow-x-auto flex-1">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-slate-400 border-b border-slate-700">
+                                <tr><th class="p-3">UID</th><th class="p-3">Số dư</th><th class="p-3">Tổng xu đã kiếm</th><th class="p-3">Thao tác</th></tr>
+                            </thead>
+                            <tbody id="users-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
     <script>
-        // DÁN ĐOẠN CẤU HÌNH CỦA BẠN VÀO ĐÂY:
         const firebaseConfig = { apiKey: "AIzaSyA2CtHpu_lm_tgrRshFzq-jD-PNrXzUrhM", authDomain: "zirogame-e078c.firebaseapp.com", databaseURL: "https://zirogame-e078c-default-rtdb.firebaseio.com", projectId: "zirogame-e078c", storageBucket: "zirogame-e078c.firebasestorage.app", messagingSenderId: "932469574208", appId: "1:932469574208:web:4ddf6635c3795f424dada5" };
         const appId = "1:932469574208:web:4ddf6635c3795f424dada5";
         
@@ -183,7 +189,7 @@
             document.getElementById('btn-'+t).classList.add('active','text-white');
         }
 
-        function initData() { loadGames(); loadSettings(); loadWithdrawals(); }
+        function initData() { loadGames(); loadSettings(); loadWithdrawals(); loadUsers(); }
 
         function addGame() {
             const t=document.getElementById('g-title').value, i=document.getElementById('g-img').value, u=document.getElementById('g-url').value;
@@ -258,6 +264,26 @@
             });
         }
         function upd(id, st) { db.collection(`artifacts/${appId}/public/data/withdrawals`).doc(id).update({status:st}).then(()=>showToast("Thành công", "success")); }
+
+        function loadUsers() {
+            db.collection(`artifacts/${appId}/users`).onSnapshot(s => {
+                const l = document.getElementById('users-list'); l.innerHTML = '';
+                s.forEach(uDoc => {
+                    const userId = uDoc.id;
+                    db.collection(`artifacts/${appId}/users/${userId}/profile`).doc('main').get().then(pDoc => {
+                        const data = pDoc.data() || { balance: 0, totalEarned: 0 };
+                        l.innerHTML += `<tr class="border-b border-slate-700"><td class="p-3 text-xs font-mono">${userId}</td><td class="p-3 text-yellow-400 font-bold">${data.balance || 0}</td><td class="p-3 text-green-400 font-bold">${data.totalEarned || 0}</td><td class="p-3"><button onclick="resetUser('${userId}')" class="text-red-400 hover:text-red-300 text-xs">Reset Xu</button></td></tr>`;
+                    });
+                });
+            });
+        }
+
+        function resetUser(uid) {
+            if(confirm("Bạn muốn reset số dư người dùng này về 0?")) {
+                db.collection(`artifacts/${appId}/users/${uid}/profile`).doc('main').update({balance: 0})
+                .then(() => showToast("Đã reset số dư!", "success"));
+            }
+        }
 
         function showToast(m,t='info') {
             const d=document.createElement('div'); d.className='toast'; 
